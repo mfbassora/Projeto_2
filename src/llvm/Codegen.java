@@ -153,13 +153,25 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(ClassDeclSimple n){return null;}
 	public LlvmValue visit(ClassDeclExtends n){return null;}
 	public LlvmValue visit(VarDecl n){
-		
+		if (n.type instanceof IntegerType )
+		{
+			LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
+			//Vamos criar uma variavel com nome
+			LlvmRegister reg = new LlvmNamedValue(n.name.s, LlvmPrimitiveType.I32);
+			assembler.add(new LlvmAlloca(reg,LlvmPrimitiveType.I32,)); 
+		}else if (n.type instanceof IntegerType )
+		{
+			
+		}
+
 		
 		return null;
-		
 	}
 	public LlvmValue visit(MethodDecl n){return null;}
-	public LlvmValue visit(Formal n){return null;}
+	public LlvmValue visit(Formal n){
+		
+		
+		return null;}
 	public LlvmValue visit(IntArrayType n){
 		
 		
@@ -167,7 +179,13 @@ public class Codegen extends VisitorAdapter{
 		
 	
 	}
-	public LlvmValue visit(BooleanType n){return null;}
+	public LlvmValue visit(BooleanType n){
+		
+		
+		
+		return null;
+		
+	}
 	public LlvmValue visit(IntegerType n){return null;}
 	public LlvmValue visit(IdentifierType n){return null;}
 	public LlvmValue visit(Block n){return null;}
