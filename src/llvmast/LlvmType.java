@@ -1,2 +1,6 @@
 package llvmast;
-public abstract class LlvmType{}
+public abstract class LlvmType{
+	
+	
+	
+}
