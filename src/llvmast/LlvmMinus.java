@@ -1,7 +1,7 @@
 package llvmast;
 // will be used even for -x
 public  class LlvmMinus extends LlvmInstruction{
-	 public LlvmRegister lhs;
+	    public LlvmRegister lhs;
 	    public LlvmType type;
 	    public LlvmValue op1, op2;
 	public LlvmMinus(LlvmRegister lhs, LlvmType type, LlvmValue op1, LlvmValue op2){

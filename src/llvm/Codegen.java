@@ -152,10 +152,21 @@ public class Codegen extends VisitorAdapter{
 	// Todos os visit's que devem ser implementados	
 	public LlvmValue visit(ClassDeclSimple n){return null;}
 	public LlvmValue visit(ClassDeclExtends n){return null;}
-	public LlvmValue visit(VarDecl n){return null;}
+	public LlvmValue visit(VarDecl n){
+		
+		
+		return null;
+		
+	}
 	public LlvmValue visit(MethodDecl n){return null;}
 	public LlvmValue visit(Formal n){return null;}
-	public LlvmValue visit(IntArrayType n){return null;}
+	public LlvmValue visit(IntArrayType n){
+		
+		
+		return null;
+		
+	
+	}
 	public LlvmValue visit(BooleanType n){return null;}
 	public LlvmValue visit(IntegerType n){return null;}
 	public LlvmValue visit(IdentifierType n){return null;}
@@ -179,17 +190,33 @@ public class Codegen extends VisitorAdapter{
 		return lhs;
 	}
 				
-	public LlvmValue visit(Times n){return null;}
+	public LlvmValue visit(Times n){
+	//Multiplicacao de numeros
+		LlvmValue v1 = n.lhs.accept(this);
+		LlvmValue v2 = n.rhs.accept(this);
+		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmTimes(lhs,LlvmPrimitiveType.I32,v1,v2));
+		return lhs;
+		}
 	public LlvmValue visit(ArrayLookup n){return null;}
 	public LlvmValue visit(ArrayLength n){return null;}
 	public LlvmValue visit(Call n){return null;}
-	public LlvmValue visit(True n){return null;}
+	public LlvmValue visit(True n){
+		
+		
+		
+		return null;}
 	public LlvmValue visit(False n){return null;}
 	public LlvmValue visit(IdentifierExp n){return null;}
 	public LlvmValue visit(This n){return null;}
 	public LlvmValue visit(NewArray n){return null;}
 	public LlvmValue visit(NewObject n){return null;}
-	public LlvmValue visit(Not n){return null;}
+	public LlvmValue visit(Not n){
+			
+		return null;
+		
+	
+	}
 	public LlvmValue visit(Identifier n){return null;}
 }
 
