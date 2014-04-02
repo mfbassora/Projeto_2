@@ -12,6 +12,6 @@ public  class LlvmMinus extends LlvmInstruction{
     }
 
     public String toString(){
-	 return "  " +lhs + " = sub " + type + " " + op1 + ", " + op2;
+	 return "  " +lhs + " = sub nsw " + type + " " + op1 + ", " + op2;
     }
 }
