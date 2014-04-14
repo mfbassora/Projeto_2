@@ -153,6 +153,7 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(ClassDeclSimple n){return null;}
 	public LlvmValue visit(ClassDeclExtends n){return null;}
 	public LlvmValue visit(VarDecl n){
+		
 		if (n.type instanceof IntegerType )
 		{
 			LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
