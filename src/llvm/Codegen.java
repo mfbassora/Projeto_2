@@ -195,7 +195,9 @@ public class Codegen extends VisitorAdapter{
 		LlvmValue v1 = n.condition.accept(this);
 		LlvmValue v2 = n.thenClause.accept(this);
 		LlvmValue v3 = n.elseClause.accept(this);
-		assembler.add(new LlvmBranch());
+		LlvmLabelValue t;
+		LlvmLabelValue e;
+		assembler.add(new LlvmBranch(v1, t, e));
 		return null;
 	}
 	public LlvmValue visit(While n){return null;}
@@ -247,7 +249,7 @@ public class Codegen extends VisitorAdapter{
 }
 
 /**********************************************************************************/
-/* === Tabela de S’mbolos ==== 
+/* === Tabela de Sï¿½mbolos ==== 
  * 
  * 
  */
@@ -277,16 +279,16 @@ public LlvmValue visit(MainClass n){
 
 public LlvmValue visit(ClassDeclSimple n){
 	List<LlvmType> typeList = null;
-	// Constroi TypeList com os tipos das vari‡veis da Classe (vai formar a Struct da classe)
+	// Constroi TypeList com os tipos das variï¿½veis da Classe (vai formar a Struct da classe)
 	
 	List<LlvmValue> varList = null;
-	// Constroi VarList com as Vari‡veis da Classe
+	// Constroi VarList com as Variï¿½veis da Classe
 
 	classes.put(n.name.s, new ClassNode(n.name.s, 
 										new LlvmStructure(typeList), 
 										varList)
       			);
-    	// Percorre n.methodList visitando cada mŽtodo
+    	// Percorre n.methodList visitando cada mï¿½todo
 	return null;
 }
 
