@@ -194,9 +194,8 @@ public class Codegen extends VisitorAdapter{
 		
 		LlvmValue v1 = n.condition.accept(this);
 		LlvmValue v2 = n.thenClause.accept(this);
+		LlvmLabelValue v2 = new LlvmLabelValue();
 		LlvmValue v3 = n.elseClause.accept(this);
-		LlvmLabelValue t;
-		LlvmLabelValue e;
 		assembler.add(new LlvmBranch(v1, t, e));
 		return null;
 	}
@@ -210,7 +209,7 @@ public class Codegen extends VisitorAdapter{
 	//Function Ready
 	public LlvmValue visit(Minus n)
 	{
-				
+		
 		LlvmValue v1 = n.lhs.accept(this);
 		LlvmValue v2 = n.rhs.accept(this);
 		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
