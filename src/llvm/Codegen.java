@@ -41,6 +41,8 @@ import llvmast.*;
 
 import java.util.*;
 
+import javax.xml.soap.Node;
+
 public class Codegen extends VisitorAdapter{
 	private List<LlvmInstruction> assembler;
 	private Codegen codeGenerator;
@@ -193,10 +195,11 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(If n){
 		
 		LlvmValue v1 = n.condition.accept(this);
-		LlvmValue v2 = n.thenClause.accept(this);
-		LlvmLabelValue v2 = new LlvmLabelValue();
-		LlvmValue v3 = n.elseClause.accept(this);
-		assembler.add(new LlvmBranch(v1, t, e));
+		LlvmLabelValue ifThen = new LlvmLabelValue("if.then");
+		LlvmLabelValue ifElse = new LlvmLabelValue("if.else");
+		assembler.add(new LlvmBranch(v1, ifThen, ifElse));
+		assembler.add(new LlvmLabel(ifThen));
+		assembler.add(new LlvmLabel(ifElse));
 		return null;
 	}
 	public LlvmValue visit(While n){return null;}
