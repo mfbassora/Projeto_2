@@ -199,7 +199,9 @@ public class Codegen extends VisitorAdapter{
 		LlvmLabelValue ifElse = new LlvmLabelValue("if.else");
 		assembler.add(new LlvmBranch(v1, ifThen, ifElse));
 		assembler.add(new LlvmLabel(ifThen));
+		n.s1.accept(this);
 		assembler.add(new LlvmLabel(ifElse));
+		n.s1.accept(this);
 		return null;
 	}
 	public LlvmValue visit(While n){return null;}
@@ -238,7 +240,11 @@ public class Codegen extends VisitorAdapter{
 		return null;}
 	public LlvmValue visit(False n){return null;}
 	public LlvmValue visit(IdentifierExp n){return null;}
-	public LlvmValue visit(This n){return null;}
+	public LlvmValue visit(This n){
+		
+		return null;
+		
+	}
 	public LlvmValue visit(NewArray n){return null;}
 	public LlvmValue visit(NewObject n){return null;}
 	public LlvmValue visit(Not n){
