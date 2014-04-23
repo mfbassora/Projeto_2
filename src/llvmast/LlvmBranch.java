@@ -15,6 +15,6 @@ public  class LlvmBranch extends LlvmInstruction{
     }
 
     public String toString(){
-		return null;
+		return "br i1 "+condi+", label "+t+", label "+f;
     }
 }

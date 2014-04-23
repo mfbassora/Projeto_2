@@ -62,7 +62,7 @@ public class Codegen extends VisitorAdapter{
 		
 		// Formato da String para o System.out.printlnijava "%d\n"
 		codeGenerator.assembler.add(new LlvmConstantDeclaration("@.formatting.string", "private constant [4 x i8] c\"%d\\0A\\00\""));	
-		//Antes de começar a emitir codigo, vamos declarar as variaveis do sistema e imprimir elas
+		//Antes de comeÔøΩar a emitir codigo, vamos declarar as variaveis do sistema e imprimir elas
 		Iterator it = mySymTab.classes.entrySet().iterator();
 		while (it.hasNext()) {
 			 Map.Entry mapEntry = (Map.Entry) it.next();
@@ -255,7 +255,11 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(While n){return null;}
 	public LlvmValue visit(Assign n){return null;}
 	public LlvmValue visit(ArrayAssign n){return null;}
-	public LlvmValue visit(And n){return null;}
+	public LlvmValue visit(And n){
+		
+		return null;
+		
+	}
 	public LlvmValue visit(LessThan n){return null;}
 	
 	 
@@ -280,7 +284,23 @@ public class Codegen extends VisitorAdapter{
 		}
 	public LlvmValue visit(ArrayLookup n){return null;}
 	public LlvmValue visit(ArrayLength n){return null;}
-	public LlvmValue visit(Call n){return null;}
+	public LlvmValue visit(Call n){
+		
+		LlvmRegister r1 = new LlvmRegister(LlvmPrimitiveType.I32);
+		LlvmValue ty = n.type.accept(this);
+		//implementar identifiertype para pegar endere√ßo pra fazer ponteiro
+		LlvmValue name = n.method.accept(this);
+		List<LlvmValue> args = new ArrayList<LlvmValue>();
+		for (util.List<Exp> m = n.actuals; m != null; m = m.tail)
+		{
+			LlvmValue aux = m.head.accept(this);
+			args.add(aux);
+					
+		};
+		
+		return null;
+		
+	}
 	public LlvmValue visit(True n){
 		
 		
@@ -296,7 +316,8 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(NewArray n){return null;}
 	public LlvmValue visit(NewObject n){return null;}
 	public LlvmValue visit(Not n){
-			
+		
+		
 		return null;
 		
 	
@@ -344,7 +365,7 @@ public LlvmValue visit(ClassDeclSimple n){
 		}else if(c.head.type instanceof BooleanType){
 			typeList.add(LlvmPrimitiveType.I1);	
 		}else if(c.head.type instanceof IntArrayType){
-		//TODO: Implementar esta parte, provavelmente temos que falar que o tipo é intArray
+		//TODO: Implementar esta parte, provavelmente temos que falar que o tipo ÔøΩ intArray
 			typeList.add(new LlvmPointer(LlvmPrimitiveType.I32));	
 
 		}else if(c.head.type instanceof IdentifierType)
