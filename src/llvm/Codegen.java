@@ -41,6 +41,8 @@ import llvmast.*;
 
 import java.util.*;
 
+import javax.xml.soap.Node;
+
 public class Codegen extends VisitorAdapter{
 	private List<LlvmInstruction> assembler;
 	private Codegen codeGenerator;
@@ -240,9 +242,14 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(If n){
 		
 		LlvmValue v1 = n.condition.accept(this);
-		LlvmValue v2 = n.thenClause.accept(this);
-		LlvmValue v3 = n.elseClause.accept(this);
-		//assembler.add(new LlvmBranch());
+
+		LlvmLabelValue ifThen = new LlvmLabelValue("if.then");
+		LlvmLabelValue ifElse = new LlvmLabelValue("if.else");
+		assembler.add(new LlvmBranch(v1, ifThen, ifElse));
+		assembler.add(new LlvmLabel(ifThen));
+		n.s1.accept(this);
+		assembler.add(new LlvmLabel(ifElse));
+		n.s1.accept(this);
 		return null;
 	}
 	public LlvmValue visit(While n){return null;}
@@ -255,7 +262,7 @@ public class Codegen extends VisitorAdapter{
 	//Function Ready
 	public LlvmValue visit(Minus n)
 	{
-				
+		
 		LlvmValue v1 = n.lhs.accept(this);
 		LlvmValue v2 = n.rhs.accept(this);
 		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
@@ -281,7 +288,11 @@ public class Codegen extends VisitorAdapter{
 		return null;}
 	public LlvmValue visit(False n){return null;}
 	public LlvmValue visit(IdentifierExp n){return null;}
-	public LlvmValue visit(This n){return null;}
+	public LlvmValue visit(This n){
+		
+		return null;
+		
+	}
 	public LlvmValue visit(NewArray n){return null;}
 	public LlvmValue visit(NewObject n){return null;}
 	public LlvmValue visit(Not n){
@@ -295,6 +306,7 @@ public class Codegen extends VisitorAdapter{
 
 /**********************************************************************************/
 /* === Tabela de Simbolos ==== 
+
  * 
  * 
  */
@@ -360,6 +372,7 @@ public LlvmValue visit(ClassDeclSimple n){
 		m.head.accept(this);
 	};
 		
+
 	return null;
 }
 
