@@ -199,9 +199,9 @@ public class Codegen extends VisitorAdapter{
 		LlvmLabelValue ifElse = new LlvmLabelValue("if.else");
 		assembler.add(new LlvmBranch(v1, ifThen, ifElse));
 		assembler.add(new LlvmLabel(ifThen));
-		n.s1.accept(this);
+		n.thenClause.accept(this);
 		assembler.add(new LlvmLabel(ifElse));
-		n.s1.accept(this);
+		n.elseClause.accept(this);
 		return null;
 	}
 	public LlvmValue visit(While n){return null;}
