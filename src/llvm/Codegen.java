@@ -52,6 +52,7 @@ public class Codegen extends VisitorAdapter{
 	
 	public Codegen(){
 		assembler = new LinkedList<LlvmInstruction>();
+		mySymTab = new SymTab();
 	}
 
 	// M√©todo de entrada do Codegen
@@ -62,13 +63,15 @@ public class Codegen extends VisitorAdapter{
 		
 		// Formato da String para o System.out.printlnijava "%d\n"
 		codeGenerator.assembler.add(new LlvmConstantDeclaration("@.formatting.string", "private constant [4 x i8] c\"%d\\0A\\00\""));	
-		//Antes de começar a emitir codigo, vamos declarar as variaveis do sistema e imprimir elas
-		Iterator it = mySymTab.classes.entrySet().iterator();
-		while (it.hasNext()) {
+		
+		//Antes de comecar a emitir codigo, vamos declarar as variaveis do sistema e imprimir elas
+		Iterator it = codeGenerator.mySymTab.classes.entrySet().iterator();
+		while (it.hasNext()) {	
 			 Map.Entry mapEntry = (Map.Entry) it.next();
+			 if(it.hasNext()){
 			 ClassNode cn = (ClassNode)mapEntry.getValue();
-			 assembler.add(new LlvmConstantDeclaration(""+ mapEntry.getKey(), "type "+cn.classType));
-	        
+			 codeGenerator.assembler.add(new LlvmConstantDeclaration("%class."+ mapEntry.getKey(), "type "+cn.classType));
+			}
 		}
 		// NOTA: sempre que X.accept(Y), ent√£o Y.visit(X);
 		// NOTA: Logo, o comando abaixo ir√° chamar codeGenerator.visit(Program), linha 75
@@ -177,12 +180,15 @@ public class Codegen extends VisitorAdapter{
 	//**** CLASSE SIMPLES ****//
 
 	public LlvmValue visit(ClassDeclSimple n){
+		
+		this.classEnv = this.mySymTab.classes.get(n.name.toString());
 		//Vamos declarar os metodos
 		for (util.List<MethodDecl> met = n.methodList; met != null; met = met.tail)
 		{
 			//Vamos declarar dinamicamente cada metodo
 			met.head.accept(this);
 		};
+		
 		return null;
 		}
 	public LlvmValue visit(ClassDeclExtends n){return null;}
@@ -214,17 +220,43 @@ public class Codegen extends VisitorAdapter{
 		return null;
 	}
 	public LlvmValue visit(MethodDecl n){
+		Helper helper = new Helper();
+		LlvmNamedValue aux;
+		List<LlvmValue> valueList = new LinkedList<LlvmValue>();
+		System.out.println(this.classEnv.nameClass);
+
+		for (util.List<Formal> formal = n.formals; formal != null; formal = formal.tail)
+		{
+			aux = new LlvmNamedValue("%"+formal.head.name.toString(),helper.findType(formal.head.type));
+			valueList.add(aux);
+		};
 		
+		//Vamos definir o metodo primeiro
+		assembler.add(new LlvmDefine("@__"+n.name.toString()+"_"+this.classEnv.nameClass, helper.findType(n.returnType),valueList));
+		assembler.add(new LlvmLabel(new LlvmLabelValue("entry")));
+		//Vamos percorrer os statements 
+		
+		for (util.List<Statement> statement = n.body; statement != null; statement = statement.tail)
+		{
+			statement.head.accept(this);
+		};
+		//Retorno
+		LlvmRegister R1 = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
+		assembler.add(new LlvmAlloca(R1, LlvmPrimitiveType.I32, new LinkedList<LlvmValue>()));
+		LlvmRegister R2 = new LlvmRegister(LlvmPrimitiveType.I32);
+		assembler.add(new LlvmLoad(R2,R1));
+		assembler.add(new LlvmRet(R2));
+		
+		//Fim do metodo
+		assembler.add(new LlvmCloseDefinition());
 		//TODO: Continuar daqui!!!
 		return null;
 		}
 	public LlvmValue visit(Formal n){
-		
-		
 		return null;}
 	public LlvmValue visit(IntArrayType n){
 		
-		
+	
 		return null;
 		
 	
@@ -247,9 +279,9 @@ public class Codegen extends VisitorAdapter{
 		LlvmLabelValue ifElse = new LlvmLabelValue("if.else");
 		assembler.add(new LlvmBranch(v1, ifThen, ifElse));
 		assembler.add(new LlvmLabel(ifThen));
-		n.s1.accept(this);
+		n.thenClause.accept(this);
 		assembler.add(new LlvmLabel(ifElse));
-		n.s1.accept(this);
+		n.elseClause.accept(this);
 		return null;
 	}
 	public LlvmValue visit(While n){return null;}
@@ -280,11 +312,13 @@ public class Codegen extends VisitorAdapter{
 		}
 	public LlvmValue visit(ArrayLookup n){return null;}
 	public LlvmValue visit(ArrayLength n){return null;}
-	public LlvmValue visit(Call n){return null;}
-	public LlvmValue visit(True n){
+	public LlvmValue visit(Call n)
+	{
+	
 		
-		
-		
+		return null;
+	}
+	public LlvmValue visit(True n){	
 		return null;}
 	public LlvmValue visit(False n){return null;}
 	public LlvmValue visit(IdentifierExp n){return null;}
@@ -303,6 +337,25 @@ public class Codegen extends VisitorAdapter{
 	}
 	public LlvmValue visit(Identifier n){return null;}
 }
+class Helper {
+	//Metodo que verifica qual LlvmType o Type pertence
+	public LlvmType findType(Type t)
+	{
+		if(t instanceof IntegerType){
+			return LlvmPrimitiveType.I32;
+		}else if(t instanceof BooleanType){
+			return (LlvmPrimitiveType.I1);	
+		}else if(t instanceof IntArrayType){
+			return new LlvmPointer(LlvmPrimitiveType.I32);	
+
+		}else if(t instanceof IdentifierType)
+		{
+			return LlvmPrimitiveType.LABEL;	
+
+		}
+		return null;
+	}
+}
 
 /**********************************************************************************/
 /* === Tabela de Simbolos ==== 
@@ -315,10 +368,17 @@ public class Codegen extends VisitorAdapter{
 class SymTab extends VisitorAdapter{
     public Map<String, ClassNode> classes;
     private ClassNode classEnv;    //aponta para a classe em uso
+    
+    public SymTab()
+    {
+    	this.classes= new HashMap<String, ClassNode>();
+    }
     public LlvmValue FillTabSymbol(Program n){
+    
 	n.accept(this);
+	
 	return null;
-}
+    }
 public LlvmValue visit(Program n){
 	n.mainClass.accept(this);
 
@@ -344,7 +404,6 @@ public LlvmValue visit(ClassDeclSimple n){
 		}else if(c.head.type instanceof BooleanType){
 			typeList.add(LlvmPrimitiveType.I1);	
 		}else if(c.head.type instanceof IntArrayType){
-		//TODO: Implementar esta parte, provavelmente temos que falar que o tipo é intArray
 			typeList.add(new LlvmPointer(LlvmPrimitiveType.I32));	
 
 		}else if(c.head.type instanceof IdentifierType)
@@ -364,6 +423,9 @@ public LlvmValue visit(ClassDeclSimple n){
 	};
 	ClassNode CS = new ClassNode(n.name.s, new LlvmStructure(typeList),varList);
 	classes.put(n.name.s, CS);
+	
+	
+
 	classEnv = CS;
     	// Percorre n.methodList visitando cada metodo
 	for (util.List<MethodDecl> m = n.methodList; m != null; m = m.tail)
@@ -414,6 +476,7 @@ public LlvmValue visit(ClassDeclSimple n){
 	public LlvmValue visit(IntArrayType n){return null;}
 	public LlvmValue visit(BooleanType n){return null;}
 	public LlvmValue visit(IntegerType n){return null;}
+	
 }
 
 class ClassNode extends LlvmType {
