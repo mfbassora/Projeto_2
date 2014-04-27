@@ -67,6 +67,7 @@ public class Codegen extends VisitorAdapter{
 		//Antes de comecar a emitir codigo, vamos declarar as variaveis do sistema e imprimir elas
 		Iterator it = codeGenerator.mySymTab.classes.entrySet().iterator();
 		while (it.hasNext()) {	
+
 			 Map.Entry mapEntry = (Map.Entry) it.next();
 			 if(it.hasNext()){
 			 ClassNode cn = (ClassNode)mapEntry.getValue();
@@ -287,7 +288,11 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(While n){return null;}
 	public LlvmValue visit(Assign n){return null;}
 	public LlvmValue visit(ArrayAssign n){return null;}
-	public LlvmValue visit(And n){return null;}
+	public LlvmValue visit(And n){
+		
+		return null;
+		
+	}
 	public LlvmValue visit(LessThan n){return null;}
 	
 	 
@@ -312,14 +317,28 @@ public class Codegen extends VisitorAdapter{
 		}
 	public LlvmValue visit(ArrayLookup n){return null;}
 	public LlvmValue visit(ArrayLength n){return null;}
-	public LlvmValue visit(Call n)
-	{
-	
+
+	public LlvmValue visit(Call n){
 		
+		LlvmRegister r1 = new LlvmRegister(LlvmPrimitiveType.I32);
+		LlvmValue ty = n.type.accept(this);
+		//implementar identifiertype para pegar endereço pra fazer ponteiro
+		LlvmValue name = n.method.accept(this);
+		List<LlvmValue> args = new ArrayList<LlvmValue>();
+		for (util.List<Exp> m = n.actuals; m != null; m = m.tail)
+		{
+			LlvmValue aux = m.head.accept(this);
+			args.add(aux);
+					
+		};
 		return null;
 	}
-	public LlvmValue visit(True n){	
-		return null;}
+
+	public LlvmValue visit(True n){
+			
+		return null;
+	}
+
 	public LlvmValue visit(False n){return null;}
 	public LlvmValue visit(IdentifierExp n){return null;}
 	public LlvmValue visit(This n){
@@ -330,7 +349,8 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(NewArray n){return null;}
 	public LlvmValue visit(NewObject n){return null;}
 	public LlvmValue visit(Not n){
-			
+		
+		
 		return null;
 		
 	
@@ -404,6 +424,7 @@ public LlvmValue visit(ClassDeclSimple n){
 		}else if(c.head.type instanceof BooleanType){
 			typeList.add(LlvmPrimitiveType.I1);	
 		}else if(c.head.type instanceof IntArrayType){
+
 			typeList.add(new LlvmPointer(LlvmPrimitiveType.I32));	
 
 		}else if(c.head.type instanceof IdentifierType)
