@@ -2,7 +2,8 @@ class a
 {
     public static void main(String[] args)
     {
-    	System.out.println(new BC().soma(2,2));
+    	
+    	System.out.println(1+1);
 
     }
 }
@@ -10,7 +11,9 @@ class BC
 {
 	public int soma(int a, int b)
 	{
-		return a+b;
+		int c;
+		c=a+b;
+		return c;
 	}
 }
    
@@ -19,7 +22,9 @@ class BCA
 {
 	public int soma(int a, int b)
 	{
-		return a+b;
+		int c;
+		c=a+b;
+		return c;
 	}
 }
    

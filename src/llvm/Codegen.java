@@ -198,7 +198,7 @@ public class Codegen extends VisitorAdapter{
 		if (n.type instanceof IntegerType )
 		{
 			//Vamos criar uma variavel com nome
-			LlvmRegister reg = new LlvmNamedValue(n.name.s, LlvmPrimitiveType.I32);
+			LlvmRegister reg = new LlvmNamedValue("%"+n.name.s, LlvmPrimitiveType.I32);
 			assembler.add(new LlvmAllocaUnic(reg,LlvmPrimitiveType.I32)); 
 		}else if (n.type instanceof BooleanType )
 		{
@@ -224,8 +224,7 @@ public class Codegen extends VisitorAdapter{
 		Helper helper = new Helper();
 		LlvmNamedValue aux;
 		List<LlvmValue> valueList = new LinkedList<LlvmValue>();
-		System.out.println(this.classEnv.nameClass);
-
+		this.classEnv = this.mySymTab.classes.get(this.classEnv.nameClass);
 		for (util.List<Formal> formal = n.formals; formal != null; formal = formal.tail)
 		{
 			aux = new LlvmNamedValue("%"+formal.head.name.toString(),helper.findType(formal.head.type));
@@ -235,11 +234,17 @@ public class Codegen extends VisitorAdapter{
 		//Vamos definir o metodo primeiro
 		assembler.add(new LlvmDefine("@__"+n.name.toString()+"_"+this.classEnv.nameClass, helper.findType(n.returnType),valueList));
 		assembler.add(new LlvmLabel(new LlvmLabelValue("entry")));
+		//Vamos declarar as variaveis
+		for (util.List<VarDecl> varDec = n.locals; varDec != null; varDec = varDec.tail)
+		{
+			varDec.head.accept(this);
+		};
 		//Vamos percorrer os statements 
-		
 		for (util.List<Statement> statement = n.body; statement != null; statement = statement.tail)
 		{
 			statement.head.accept(this);
+		
+			
 		};
 		//Retorno
 		LlvmRegister R1 = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
@@ -250,9 +255,10 @@ public class Codegen extends VisitorAdapter{
 		
 		//Fim do metodo
 		assembler.add(new LlvmCloseDefinition());
-		//TODO: Continuar daqui!!!
 		return null;
 		}
+	
+	
 	public LlvmValue visit(Formal n){
 		return null;}
 	public LlvmValue visit(IntArrayType n){
@@ -285,8 +291,21 @@ public class Codegen extends VisitorAdapter{
 		n.elseClause.accept(this);
 		return null;
 	}
-	public LlvmValue visit(While n){return null;}
-	public LlvmValue visit(Assign n){return null;}
+	public LlvmValue visit(While n){
+		
+		
+		
+		return null;
+	}
+	
+	public LlvmValue visit(Assign n)
+	{
+		//Declarando a variavel
+		n.var.accept(this);
+		n.exp.accept(this);
+		return null;
+	}
+	
 	public LlvmValue visit(ArrayAssign n){return null;}
 	public LlvmValue visit(And n){
 		
@@ -320,17 +339,6 @@ public class Codegen extends VisitorAdapter{
 
 	public LlvmValue visit(Call n){
 		
-		LlvmRegister r1 = new LlvmRegister(LlvmPrimitiveType.I32);
-		LlvmValue ty = n.type.accept(this);
-		//implementar identifiertype para pegar endereço pra fazer ponteiro
-		LlvmValue name = n.method.accept(this);
-		List<LlvmValue> args = new ArrayList<LlvmValue>();
-		for (util.List<Exp> m = n.actuals; m != null; m = m.tail)
-		{
-			LlvmValue aux = m.head.accept(this);
-			args.add(aux);
-					
-		};
 		return null;
 	}
 
@@ -340,7 +348,16 @@ public class Codegen extends VisitorAdapter{
 	}
 
 	public LlvmValue visit(False n){return null;}
-	public LlvmValue visit(IdentifierExp n){return null;}
+	public LlvmValue visit(IdentifierExp n){
+		Helper helper = new Helper();
+		LlvmNamedValue IdExp =new LlvmNamedValue("%"+n.name.s, helper.findType(n.type));
+		LlvmType lType =helper.findType(n.type); 
+		//Vamos alocar primeiro
+		LlvmRegister R1 = new LlvmRegister(new LlvmPointer(lType));
+		assembler.add(new LlvmAllocaUnic(R1,lType));
+		assembler.add(new LlvmStore(IdExp, R1));
+		return IdExp;
+		}
 	public LlvmValue visit(This n){
 		
 		return null;
@@ -460,7 +477,11 @@ public LlvmValue visit(ClassDeclSimple n){
 }
 
 	public LlvmValue visit(ClassDeclExtends n){return null;}
-	public LlvmValue visit(VarDecl n){return null;}
+	public LlvmValue visit(VarDecl n){
+		
+		return null;
+		
+	}
 	public LlvmValue visit(Formal n){return null;}
 	
 	

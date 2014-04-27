@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-void teste(int test2[3])
+int teste(int a, int b)
 {
-
-};
+	int c;
+	c=a+b;
+	return c;
+}
 int main(){
-	
+	int d;
+	d=teste(1,1);
 	return 0;
 };
