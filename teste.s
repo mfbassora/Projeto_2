@@ -14,9 +14,14 @@ define i32 @__soma_BC() {
 entry1:
   %c = alloca i32
   %a = alloca i32
+  %b = alloca i1
   store i32 3, i32 * %a
-  %tmp5 = load i32 * %a
-  store i32 %tmp5, i32 * %c
+  store i1 true, i1 * %b
+br label %while2
+while2:
+  %tmp5 = load i1 * %b
+br i1 %tmp5, label %whileEnd3, label %while2
+whileEnd3:
   %tmp6 = alloca i32
   %tmp7 = load i32 * %tmp6
   ret i32 %tmp7

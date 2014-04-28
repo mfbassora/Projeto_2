@@ -12,11 +12,15 @@ class BC
 	public int soma()
 	{
 		int c;
-		int a;		
+		int a;
+		boolean b;
 		a=3;
-		c=a;
+		b=true;
+		while(b){
+			b=false;
+		}
 		
-		return c;
+		return 0;
 	}
 }
    

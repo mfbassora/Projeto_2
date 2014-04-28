@@ -196,6 +196,8 @@ public class Codegen extends VisitorAdapter{
 		//TODO: Fazer
 		return null;}
 	public LlvmValue visit(VarDecl n){
+		System.out.println("VarDecl");
+
 		//Primeiro verificamos que tipo ele e
 		if (n.type instanceof IntegerType )
 		{
@@ -273,32 +275,49 @@ public class Codegen extends VisitorAdapter{
 	
 	
 	public LlvmValue visit(Formal n){
+		System.out.println("Formal");
+
+		//Teoricamente nao sera preciso implementar essa func, esta em Helper().
 		return null;}
 	public LlvmValue visit(IntArrayType n){
-		
+		System.out.println("IntArrayType");
+
+		//Teoricamente nao sera preciso implementar essa func, esta em Helper().
+
 	
 		return null;
 		
 	
 	}
 	public LlvmValue visit(BooleanType n){
-		
-		
+		System.out.println("BooleanType");
+
+		//Teoricamente nao sera preciso implementar essa func, esta em Helper().
 		
 		return null;
 		
 	}
-	public LlvmValue visit(IntegerType n){return null;}
+	public LlvmValue visit(IntegerType n){
+		System.out.println("IntegerType");
+
+		//Teoricamente nao sera preciso implementar essa func, esta em Helper().
+
+		return null;}
 
 	public LlvmValue visit(IdentifierType n){
-		
+		System.out.println("IdentifierType");
+
 		LlvmType t = this.mySymTab.classes.get(n.name);
 		return new LlvmRegister(t.toString(), t);
 		
 	}
-	public LlvmValue visit(Block n){return null;}
+	public LlvmValue visit(Block n){
+		System.out.println("Block");
+
+		return null;}
 	public LlvmValue visit(If n){
-		
+		System.out.println("If");
+
 		LlvmValue v1 = n.condition.accept(this);
 
 		LlvmLabelValue ifThen = new LlvmLabelValue("if.then");
@@ -311,35 +330,58 @@ public class Codegen extends VisitorAdapter{
 		return null;
 	}
 	public LlvmValue visit(While n){
-		
-		//TODO: Fazer
+		System.out.println("While");
+		//TODO: Parei nesta parte
+		LlvmLabelValue whileLabel =new LlvmLabelValue("while"); 
+		LlvmLabelValue whileEnd =new LlvmLabelValue("whileEnd"); 
+		//Primeiro usaremos um br label %while para entrar no while
+		assembler.add(new LlvmBranch(whileLabel));
+		//Vamos primeiro criar o label do while
 
+		assembler.add(new LlvmLabel(whileLabel));
+		//Agora vamos declarar o statement do while
+		n.body.accept(this);
+		//Por fim usamos o branch para verificar se podemos sair da condicao ou nao
+		assembler.add(new LlvmBranch(n.condition.accept(this), whileEnd, whileLabel));
+		assembler.add(new LlvmLabel(whileEnd));
+		
 		
 		return null;
 	}
 	
 	public LlvmValue visit(Assign n)
 	{
+		System.out.println("Assign");
+
 		//Declarando a variavel
 		LlvmValue var= n.var.accept(this);
+		//Declarando a expressao
+
 		LlvmValue exp =n.exp.accept(this);
-		
 		assembler.add(new LlvmStore(exp,var));
 		return null;
 	}
 	
 	public LlvmValue visit(ArrayAssign n){
+		System.out.println("ArrayAssign");
+
+		
 		//TODO: Fazer
 		return null;
 		
 	}
 	public LlvmValue visit(And n){
+		System.out.println("And");
+
 		//TODO: Fazer
 
 		return null;
 		
 	}
-	public LlvmValue visit(LessThan n){return null;}
+	public LlvmValue visit(LessThan n){
+		System.out.println("LessThan");
+
+		return null;}
 	//TODO: Fazer
 
 	 
@@ -360,18 +402,23 @@ public class Codegen extends VisitorAdapter{
 		LlvmValue v2 = n.rhs.accept(this);
 		LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
 		assembler.add(new LlvmTimes(lhs,LlvmPrimitiveType.I32,v1,v2));
+		
 		return lhs;
 		}
 	
 	public LlvmValue visit(ArrayLookup n){
 		//TODO: Fazer
+		System.out.println("ArrayLookup");
 
 		return null;}
-	public LlvmValue visit(ArrayLength n){return null;}
+	public LlvmValue visit(ArrayLength n){
+		System.out.println("ArrayLength");
+return null;}
 
 	public LlvmValue visit(Call n){
+		System.out.println("Call");
 
-		
+//TODO: Algumas falhas na codificacao Por isso esta comentado		
 //		LlvmRegister r1 = new LlvmRegister(LlvmPrimitiveType.I32);
 //		LlvmValue ty = n.type.accept(this);
 //		LlvmRegister r2 = IdentifierType(ty);
@@ -388,16 +435,21 @@ public class Codegen extends VisitorAdapter{
 	}
 
 	public LlvmValue visit(True n){
-			
-		return null;
+		System.out.println("True");
+
+		return new LlvmBool(1);
 	}
 
-	public LlvmValue visit(False n){return null;}
+	public LlvmValue visit(False n){
+		System.out.println("False");
+
+		return new LlvmBool(0);
+		
+	}
 	
 	//DONE
 	public LlvmValue visit(IdentifierExp n){
-		
-		System.out.println("asdas");
+
 		Helper helper = new Helper();
 		LlvmType lType =helper.findType(n.type); 
 		//Vamos dar o load em uma variavel temporaria
@@ -410,6 +462,7 @@ public class Codegen extends VisitorAdapter{
 		}
 	public LlvmValue visit(This n){
 		//TODO: Fazer
+		System.out.println("depois do var");
 
 		return null;
 		
@@ -424,19 +477,7 @@ public class Codegen extends VisitorAdapter{
 		LlvmValue arraySize = n.size.accept(this);
 		
 		assembler.add(new LlvmMalloc(R1,helper.findType(n.type),arraySize));
-//Vamos verificar se este valor esta em um registrador ou e um LlvmIntegerLiteral
-//		if(arraySize instanceof LlvmIntegerLiteral)
-//		{
-//			System.out.println("litera");
-//			//Caso afirmativo vamos usar LlvmArray para allocar o vetor
-//			LlvmArray array = new LlvmArray(Integer.parseInt(arraySize.toString()),helper.findType(n.size.type));
-//			assembler.add(new LlvmAllocaUnic(R1,array));
-//		}else{
-//			List<LlvmValue> listV= new ArrayList<LlvmValue>();
-//			listV.add(arraySize);
-//			//Vamos usar o alloc com x posices de int
-//			assembler.add(new LlvmAlloca(R1,helper.findType(n.type),listV));
-//		}
+
 //Vamos agora retornar o ponteiro para a array
 		
 		return R1;
@@ -458,7 +499,8 @@ public class Codegen extends VisitorAdapter{
 		//Vamos achar a declaracao da variavel primeiro
 		String name = null;
 		syntaxtree.Type tp = null;
-		System.out.println(n.s);
+		
+
 		Helper helper=new Helper();
 		for (util.List<VarDecl> varDec = this.methodEnv.varList; varDec != null; varDec = varDec.tail)
 		{
@@ -474,6 +516,8 @@ public class Codegen extends VisitorAdapter{
 		
 		//Declarando o namedValue
 		return new LlvmNamedValue("%"+name,new LlvmPointer(helper.findType(tp)));
+		
+
 		}
 }
 class Helper {
@@ -483,6 +527,7 @@ class Helper {
 		if(t instanceof IntegerType){
 			return LlvmPrimitiveType.I32;
 		}else if(t instanceof BooleanType){
+
 			return (LlvmPrimitiveType.I1);	
 		}else if(t instanceof IntArrayType){
 			return new LlvmPointer(LlvmPrimitiveType.I32);	

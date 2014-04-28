@@ -4,7 +4,9 @@ public  class LlvmBranch extends LlvmInstruction{
 	public LlvmLabelValue t, f;
 
     public LlvmBranch(LlvmLabelValue label){
-
+    	this.t=label;
+    	this.condi=null;
+    	this.f=null;
     }
     
     public LlvmBranch(LlvmValue cond,  LlvmLabelValue brTrue, LlvmLabelValue brFalse){
@@ -15,6 +17,12 @@ public  class LlvmBranch extends LlvmInstruction{
     }
 
     public String toString(){
-		return "br i1 "+condi+", label "+t+", label "+f;
+    	if(this.condi!= null){
+    		// branch normal
+		return "br i1 "+condi+", label %"+t+", label %"+f;
+    	}else{
+    		//Branch inicial
+    	return "br label %"+t;
+    	}
     }
 }
