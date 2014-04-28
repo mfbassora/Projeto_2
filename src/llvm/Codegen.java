@@ -270,7 +270,12 @@ public class Codegen extends VisitorAdapter{
 		
 	}
 	public LlvmValue visit(IntegerType n){return null;}
-	public LlvmValue visit(IdentifierType n){return null;}
+	public LlvmValue visit(IdentifierType n){
+		
+		LlvmType t = this.symTab.classes.get(n.name);
+		return new LlvmRegister(t.toString(), t);
+		
+	}
 	public LlvmValue visit(Block n){return null;}
 	public LlvmValue visit(If n){
 		
@@ -322,7 +327,7 @@ public class Codegen extends VisitorAdapter{
 		
 		LlvmRegister r1 = new LlvmRegister(LlvmPrimitiveType.I32);
 		LlvmValue ty = n.type.accept(this);
-		//implementar identifiertype para pegar endereço pra fazer ponteiro
+		LlvmRegister r2 = IdentifierType(ty);
 		LlvmValue name = n.method.accept(this);
 		List<LlvmValue> args = new ArrayList<LlvmValue>();
 		for (util.List<Exp> m = n.actuals; m != null; m = m.tail)
@@ -331,6 +336,7 @@ public class Codegen extends VisitorAdapter{
 			args.add(aux);
 					
 		};
+		assembler.add(new LlvmCall(r1, ty, r2, name, args));
 		return null;
 	}
 
