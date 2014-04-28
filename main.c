@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-int teste(int a, int b)
-{
-	int c;
-	c=a+b;
-	return c;
-}
+
 int main(){
-	int d;
-	d=teste(1,1);
+	int c;
+		int a;		
+		a=3;
+		c=a;
+
+	
 	return 0;
 };

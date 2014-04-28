@@ -9,23 +9,16 @@ class a
 }
 class BC
 {
-	public int soma(int a, int b)
+	public int soma()
 	{
 		int c;
-		c=a+b;
+		int a;		
+		a=3;
+		c=a;
+		
 		return c;
 	}
 }
    
 
-class BCA
-{
-	public int soma(int a, int b)
-	{
-		int c;
-		c=a+b;
-		return c;
-	}
-}
-   
 

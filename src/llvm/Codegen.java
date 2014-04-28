@@ -192,7 +192,9 @@ public class Codegen extends VisitorAdapter{
 		
 		return null;
 		}
-	public LlvmValue visit(ClassDeclExtends n){return null;}
+	public LlvmValue visit(ClassDeclExtends n){
+		//TODO: Fazer
+		return null;}
 	public LlvmValue visit(VarDecl n){
 		//Primeiro verificamos que tipo ele e
 		if (n.type instanceof IntegerType )
@@ -203,17 +205,17 @@ public class Codegen extends VisitorAdapter{
 		}else if (n.type instanceof BooleanType )
 		{
 			//Vamos criar uma variavel com nome
-			LlvmRegister reg = new LlvmNamedValue(n.name.s, LlvmPrimitiveType.I1);
+			LlvmRegister reg = new LlvmNamedValue("%"+n.name.s, LlvmPrimitiveType.I1);
 			assembler.add(new LlvmAllocaUnic(reg,LlvmPrimitiveType.I1)); 
 		}else if (n.type instanceof IdentifierType )
 		{
 			//Vamos criar uma variavel com nome
-			LlvmRegister reg = new LlvmNamedValue(n.name.s, LlvmPrimitiveType.LABEL);
+			LlvmRegister reg = new LlvmNamedValue("%"+n.name.s, LlvmPrimitiveType.LABEL);
 			assembler.add(new LlvmAllocaUnic(reg,LlvmPrimitiveType.LABEL)); 
 		}else if (n.type instanceof syntaxtree.IntArrayType )
 		{
 			//Vamos criar uma variavel com nome
-			LlvmRegister reg = new LlvmNamedValue(n.name.s,  new LlvmPointer(LlvmPrimitiveType.I32));
+			LlvmRegister reg = new LlvmNamedValue("%"+n.name.s,  new LlvmPointer(LlvmPrimitiveType.I32));
 			assembler.add(new LlvmAllocaUnic(reg,new LlvmPointer(LlvmPrimitiveType.I32))); 
 		}
 
@@ -221,10 +223,21 @@ public class Codegen extends VisitorAdapter{
 		return null;
 	}
 	public LlvmValue visit(MethodDecl n){
+		
 		Helper helper = new Helper();
 		LlvmNamedValue aux;
 		List<LlvmValue> valueList = new LinkedList<LlvmValue>();
-		this.classEnv = this.mySymTab.classes.get(this.classEnv.nameClass);
+	
+
+		//Vamos achar o current method pelo nome
+		for(int i=0;i<this.classEnv.methodList.size();i++)
+		{
+			if(this.classEnv.methodList.get(i).identificator.equals(n.name.toString()))
+			{
+				//achamos o method
+				this.methodEnv=this.classEnv.methodList.get(i);
+			}
+		}
 		for (util.List<Formal> formal = n.formals; formal != null; formal = formal.tail)
 		{
 			aux = new LlvmNamedValue("%"+formal.head.name.toString(),helper.findType(formal.head.type));
@@ -277,7 +290,10 @@ public class Codegen extends VisitorAdapter{
 	}
 	public LlvmValue visit(IntegerType n){return null;}
 	public LlvmValue visit(IdentifierType n){return null;}
-	public LlvmValue visit(Block n){return null;}
+	public LlvmValue visit(Block n){
+		//TODO: Fazer
+
+		return null;}
 	public LlvmValue visit(If n){
 		
 		LlvmValue v1 = n.condition.accept(this);
@@ -293,7 +309,8 @@ public class Codegen extends VisitorAdapter{
 	}
 	public LlvmValue visit(While n){
 		
-		
+		//TODO: Fazer
+
 		
 		return null;
 	}
@@ -301,21 +318,29 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(Assign n)
 	{
 		//Declarando a variavel
-		n.var.accept(this);
-		n.exp.accept(this);
+		LlvmValue var= n.var.accept(this);
+		LlvmValue exp =n.exp.accept(this);
+		
+		assembler.add(new LlvmStore(exp,var));
 		return null;
 	}
 	
-	public LlvmValue visit(ArrayAssign n){return null;}
-	public LlvmValue visit(And n){
+	public LlvmValue visit(ArrayAssign n){
+		//TODO: Fazer
+		return null;
 		
+	}
+	public LlvmValue visit(And n){
+		//TODO: Fazer
+
 		return null;
 		
 	}
 	public LlvmValue visit(LessThan n){return null;}
-	
+	//TODO: Fazer
+
 	 
-	//Function Ready
+	//DONE
 	public LlvmValue visit(Minus n)
 	{
 		
@@ -325,7 +350,7 @@ public class Codegen extends VisitorAdapter{
 		assembler.add(new LlvmMinus(lhs,LlvmPrimitiveType.I32,v1,v2));
 		return lhs;
 	}
-				
+	//DONE		
 	public LlvmValue visit(Times n){
 	//Multiplicacao de numeros
 		LlvmValue v1 = n.lhs.accept(this);
@@ -334,11 +359,15 @@ public class Codegen extends VisitorAdapter{
 		assembler.add(new LlvmTimes(lhs,LlvmPrimitiveType.I32,v1,v2));
 		return lhs;
 		}
-	public LlvmValue visit(ArrayLookup n){return null;}
+	
+	public LlvmValue visit(ArrayLookup n){
+		//TODO: Fazer
+
+		return null;}
 	public LlvmValue visit(ArrayLength n){return null;}
 
 	public LlvmValue visit(Call n){
-		
+		//TODO: Panta fara;
 		return null;
 	}
 
@@ -348,31 +377,88 @@ public class Codegen extends VisitorAdapter{
 	}
 
 	public LlvmValue visit(False n){return null;}
+	
+	//DONE
 	public LlvmValue visit(IdentifierExp n){
+		
+		System.out.println("asdas");
 		Helper helper = new Helper();
-		LlvmNamedValue IdExp =new LlvmNamedValue("%"+n.name.s, helper.findType(n.type));
 		LlvmType lType =helper.findType(n.type); 
-		//Vamos alocar primeiro
-		LlvmRegister R1 = new LlvmRegister(new LlvmPointer(lType));
-		assembler.add(new LlvmAllocaUnic(R1,lType));
-		assembler.add(new LlvmStore(IdExp, R1));
-		return IdExp;
+		//Vamos dar o load em uma variavel temporaria
+		LlvmRegister lhs = new LlvmRegister(lType);
+		LlvmNamedValue addressReg = new LlvmNamedValue("%"+n.name.s, new LlvmPointer(helper.findType(n.type)));
+		assembler.add(new LlvmLoad(lhs,addressReg));
+		//Depois de dar um load, enviamos o registrador para ser usado
+		return lhs;
+
 		}
 	public LlvmValue visit(This n){
-		
+		//TODO: Fazer
+
 		return null;
 		
 	}
-	public LlvmValue visit(NewArray n){return null;}
-	public LlvmValue visit(NewObject n){return null;}
+	
+	public LlvmValue visit(NewArray n){
+		//Vamos alocar o espaco da array
+		Helper helper = new Helper();
+		//Registrador que guardara o valor da array
+		LlvmRegister R1 = new LlvmRegister(helper.findType(n.type));
+		//Achando o valor da array
+		LlvmValue arraySize = n.size.accept(this);
+		
+		assembler.add(new LlvmMalloc(R1,helper.findType(n.type),arraySize));
+//Vamos verificar se este valor esta em um registrador ou e um LlvmIntegerLiteral
+//		if(arraySize instanceof LlvmIntegerLiteral)
+//		{
+//			System.out.println("litera");
+//			//Caso afirmativo vamos usar LlvmArray para allocar o vetor
+//			LlvmArray array = new LlvmArray(Integer.parseInt(arraySize.toString()),helper.findType(n.size.type));
+//			assembler.add(new LlvmAllocaUnic(R1,array));
+//		}else{
+//			List<LlvmValue> listV= new ArrayList<LlvmValue>();
+//			listV.add(arraySize);
+//			//Vamos usar o alloc com x posices de int
+//			assembler.add(new LlvmAlloca(R1,helper.findType(n.type),listV));
+//		}
+//Vamos agora retornar o ponteiro para a array
+		
+		return R1;
+		}
+	public LlvmValue visit(NewObject n){
+		//TODO: Fazer
+
+		return null;
+		}
 	public LlvmValue visit(Not n){
 		
-		
+		//TODO: Fazer
+
 		return null;
 		
 	
 	}
-	public LlvmValue visit(Identifier n){return null;}
+	public LlvmValue visit(Identifier n){
+		//Vamos achar a declaracao da variavel primeiro
+		String name = null;
+		syntaxtree.Type tp = null;
+		System.out.println(n.s);
+		Helper helper=new Helper();
+		for (util.List<VarDecl> varDec = this.methodEnv.varList; varDec != null; varDec = varDec.tail)
+		{
+				
+				if(varDec.head.name.toString().equals(n.s))
+				{
+					//Achamos a declaracao
+					name = varDec.head.name.toString();
+					tp=varDec.head.type;
+				}
+			
+		};
+		
+		//Declarando o namedValue
+		return new LlvmNamedValue("%"+name,new LlvmPointer(helper.findType(tp)));
+		}
 }
 class Helper {
 	//Metodo que verifica qual LlvmType o Type pertence
@@ -488,24 +574,25 @@ public LlvmValue visit(ClassDeclSimple n){
 	
 	public LlvmValue visit(MethodDecl n){
 		//Vamos fazer a declaracao deste metodo e guardar na lista da classe
+		
 		if(n.returnType instanceof IntegerType)
 		{
-			MethodNode mn=new MethodNode(n.name.toString(), LlvmPrimitiveType.I32,n.formals,classEnv);
+			MethodNode mn=new MethodNode(n.name.toString(), LlvmPrimitiveType.I32,n.formals,n.locals,classEnv);
 			//Guardando method dentro da classe que ele pertence
 			classEnv.methodList.add(mn);
 		}else if(n.returnType instanceof BooleanType)
 		{
-			MethodNode mn=new MethodNode(n.name.toString(), LlvmPrimitiveType.I1,n.formals,classEnv);
+			MethodNode mn=new MethodNode(n.name.toString(), LlvmPrimitiveType.I1,n.formals,n.locals,classEnv);
 			//Guardando method dentro da classe que ele pertence
 			classEnv.methodList.add(mn);
 		}else if(n.returnType instanceof IntArrayType)
 		{
-			MethodNode mn=new MethodNode(n.name.toString(), new LlvmPointer(LlvmPrimitiveType.I32) ,n.formals,classEnv);
+			MethodNode mn=new MethodNode(n.name.toString(), new LlvmPointer(LlvmPrimitiveType.I32) ,n.formals,n.locals,classEnv);
 			//Guardando method dentro da classe que ele pertence
 			classEnv.methodList.add(mn);
 		}else if(n.returnType instanceof IdentifierType)
 		{
-			MethodNode mn=new MethodNode(n.name.toString(),LlvmPrimitiveType.LABEL ,n.formals,classEnv);
+			MethodNode mn=new MethodNode(n.name.toString(),LlvmPrimitiveType.LABEL ,n.formals,n.locals,classEnv);
 			//Guardando method dentro da classe que ele pertence
 			classEnv.methodList.add(mn);
 		}
@@ -537,12 +624,14 @@ class ClassNode extends LlvmType {
 class MethodNode extends LlvmType{
 	LlvmType retType;
 	util.List<Formal> formalList;
+	util.List<VarDecl> varList;
 	ClassNode methodClass;
 	String identificator;
 	
-	MethodNode (String nameMethod,LlvmType retType, util.List<Formal> formalList, ClassNode methodClass){
+	MethodNode (String nameMethod,LlvmType retType, util.List<Formal> formalList,util.List<VarDecl> varList, ClassNode methodClass){
 	this.identificator=nameMethod;
 	this.formalList=formalList;
+	this.varList=varList;
 	this.retType=retType;
 	this.methodClass=methodClass;
 	}

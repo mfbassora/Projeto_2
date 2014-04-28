@@ -1,6 +1,7 @@
 @.formatting.string = private constant [4 x i8] c"%d\0A\00"
+%class.BC = type { }
 define i32 @main() {
-entry:
+entry0:
   %tmp0 = alloca i32
   store i32 0, i32 * %tmp0
   %tmp1 = add i32 1, 1
@@ -9,12 +10,16 @@ entry:
   %tmp4 = load i32 * %tmp0
   ret i32 %tmp4
 }
-define i32 @BC() {
-entry:
-  %tmp5 = alloca i32
-  store i32 0, i32 * %tmp5
-  %tmp6 = load i32 * %tmp5
-  ret i32 %tmp6
+define i32 @__soma_BC() {
+entry1:
+  %c = alloca i32
+  %a = alloca i32
+  store i32 3, i32 * %a
+  %tmp5 = load i32 * %a
+  store i32 %tmp5, i32 * %c
+  %tmp6 = alloca i32
+  %tmp7 = load i32 * %tmp6
+  ret i32 %tmp7
 }
 declare i32 @printf (i8 *, ...)
 declare i8 * @malloc (i32)
