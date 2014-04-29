@@ -421,8 +421,8 @@ return null;}
 //TODO: Algumas falhas na codificacao Por isso esta comentado		
 //		LlvmRegister r1 = new LlvmRegister(LlvmPrimitiveType.I32);
 //		LlvmValue ty = n.type.accept(this);
-//		LlvmRegister r2 = IdentifierType(ty);
 //		LlvmValue name = n.method.accept(this);
+//		LlvmRegister r2 = IdentifierType(name);
 //		List<LlvmValue> args = new ArrayList<LlvmValue>();
 //		for (util.List<Exp> m = n.actuals; m != null; m = m.tail)
 //		{
