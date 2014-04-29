@@ -331,7 +331,6 @@ public class Codegen extends VisitorAdapter{
 	}
 	public LlvmValue visit(While n){
 		System.out.println("While");
-		//TODO: Parei nesta parte
 		LlvmLabelValue whileLabel =new LlvmLabelValue("while"); 
 		LlvmLabelValue whileEnd =new LlvmLabelValue("whileEnd"); 
 		//Primeiro usaremos um br label %while para entrar no while
@@ -417,8 +416,14 @@ return null;}
 
 	public LlvmValue visit(Call n){
 		System.out.println("Call");
-
-//TODO: Algumas falhas na codificacao Por isso esta comentado		
+		
+		//Primeiro temos de alocar a classe(objeto) a qual o metodo chamado pertence
+		n.object.accept(this);
+		
+//
+//		
+//
+//		//Agora sim podemos fazer a call
 //		LlvmRegister r1 = new LlvmRegister(LlvmPrimitiveType.I32);
 //		LlvmValue ty = n.type.accept(this);
 //		LlvmRegister r2 = IdentifierType(ty);
@@ -431,7 +436,8 @@ return null;}
 //					
 //		};
 //		assembler.add(new LlvmCall(r1, ty, r2, name, args));
-		return null;
+
+		return new LlvmLabelValue("asd");
 	}
 
 	public LlvmValue visit(True n){
@@ -449,6 +455,7 @@ return null;}
 	
 	//DONE
 	public LlvmValue visit(IdentifierExp n){
+		System.out.println("IdentifierExp");
 
 		Helper helper = new Helper();
 		LlvmType lType =helper.findType(n.type); 
@@ -469,6 +476,8 @@ return null;}
 	}
 	
 	public LlvmValue visit(NewArray n){
+		System.out.println("NewArray");
+
 		//Vamos alocar o espaco da array
 		Helper helper = new Helper();
 		//Registrador que guardara o valor da array
@@ -484,11 +493,20 @@ return null;}
 		}
 	public LlvmValue visit(NewObject n){
 		//TODO: Fazer
+		Helper help = new Helper();
+		System.out.println("NewObject");
 
-		return null;
+		LlvmValue r1 = new LlvmRegister(help.findType(n.type));
+		LlvmValue cD = new LlvmLabelValue(n.className.s);
+		System.out.println(cD.toString());
+
+		assembler.add(new LlvmAllocaUnic(r1,cD));
+		return r1;
+		
 		}
 	public LlvmValue visit(Not n){
-		
+		System.out.println("Not");
+
 		//TODO: Fazer
 
 		return null;
@@ -497,6 +515,8 @@ return null;}
 	}
 	public LlvmValue visit(Identifier n){
 		//Vamos achar a declaracao da variavel primeiro
+		System.out.println("Identifier");
+
 		String name = null;
 		syntaxtree.Type tp = null;
 		
