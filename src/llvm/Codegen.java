@@ -484,8 +484,8 @@ return null;}
 		LlvmRegister R1 = new LlvmRegister(helper.findType(n.type));
 		//Achando o valor da array
 		LlvmValue arraySize = n.size.accept(this);
-		
-		assembler.add(new LlvmMalloc(R1,helper.findType(n.type),arraySize));
+		System.out.println(helper.findType(n.type));
+		assembler.add(new LlvmMalloc(R1,LlvmPrimitiveType.I32,arraySize));
 
 //Vamos agora retornar o ponteiro para a array
 		

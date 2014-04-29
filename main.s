@@ -4,12 +4,30 @@ target triple = "x86_64-apple-macosx10.9.0"
 
 define i32 @main() nounwind uwtable ssp {
   %1 = alloca i32, align 4
-  %a = alloca i8, align 1
-  %b = alloca i32*, align 8
-  %c = alloca [20 x i32], align 16
+  %a = alloca i32, align 4
+  %b = alloca i32, align 4
+  %d = alloca i32*, align 8
+  %2 = alloca i8*
+  %3 = alloca i32
   store i32 0, i32* %1
-  store i8 1, i8* %a, align 1
-  %2 = getelementptr inbounds [20 x i32]* %c, i32 0, i32 0
-  store i32* %2, i32** %b, align 8
-  ret i32 0
+  store i32 3, i32* %a, align 4
+  store i32 6, i32* %b, align 4
+  %4 = load i32* %a, align 4
+  %5 = load i32* %b, align 4
+  %6 = add nsw i32 %4, %5
+  %7 = zext i32 %6 to i64
+  %8 = call i8* @llvm.stacksave()
+  store i8* %8, i8** %2
+  %9 = alloca i32, i64 %7, align 16
+  store i32* %9, i32** %d, align 8
+  store i32 0, i32* %1
+  store i32 1, i32* %3
+  %10 = load i8** %2
+  call void @llvm.stackrestore(i8* %10)
+  %11 = load i32* %1
+  ret i32 %11
 }
+
+declare i8* @llvm.stacksave() nounwind
+
+declare void @llvm.stackrestore(i8*) nounwind

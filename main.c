@@ -3,11 +3,11 @@
 #include <stdbool.h>
 
 int main(){
-		bool a=true;		
-		
-		int * b;
-		int c[20];
-		b=c;
+		int a=3;
+		int b=6;
+		int * d;
+		int c[a+b];
+		d=c;
 	
 	return 0;
 };
