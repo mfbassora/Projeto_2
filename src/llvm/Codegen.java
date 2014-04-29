@@ -416,16 +416,10 @@ return null;}
 
 	public LlvmValue visit(Call n){
 		System.out.println("Call");
-		
-		//Primeiro temos de alocar a classe(objeto) a qual o metodo chamado pertence
-		n.object.accept(this);
-		
-//
-//		
-//
-//		//Agora sim podemos fazer a call
-//		LlvmRegister r1 = new LlvmRegister(LlvmPrimitiveType.I32);
-//		LlvmValue ty = n.type.accept(this);
+		Helper help = new Helper();
+		LlvmValue r1 = n.object.accept(this);
+		LlvmType ty = help.findType(n.type);
+		LlvmRegister lhs = new LlvmRegister(ty);
 //		LlvmValue name = n.method.accept(this);
 //		LlvmRegister r2 = IdentifierType(name);
 //		List<LlvmValue> args = new ArrayList<LlvmValue>();
@@ -435,7 +429,7 @@ return null;}
 //			args.add(aux);
 //					
 //		};
-//		assembler.add(new LlvmCall(r1, ty, r2, name, args));
+//		assembler.add(new LlvmCall(r3, ty, r2, name, args));
 
 		return new LlvmLabelValue("asd");
 	}
