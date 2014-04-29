@@ -5,10 +5,9 @@
 int main(){
 		bool a=true;		
 		
-		while(a)
-		{
-			a=false;
-		}
+		int * b;
+		int c[20];
+		b=c;
 	
 	return 0;
 };

@@ -3,7 +3,7 @@ class a
     public static void main(String[] args)
     {
     	
-    	System.out.println(1+1);
+    	System.out.println(1+3);
 
     }
 }
@@ -11,18 +11,9 @@ class BC
 {
 	public int soma()
 	{
-		int c;
-		int a;
-		boolean b;
-		a=3;
-		b=true;
-		while(b){
-			b=false;
-		}
-		
+		int[] a;
+		a = new int[10];		
 		return 0;
 	}
 }
    
-
-
