@@ -456,11 +456,27 @@ public class Codegen extends VisitorAdapter{
 	public LlvmValue visit(ArrayLookup n){
 		//TODO: Fazer
 		System.out.println("ArrayLookup");
-
-		return null;}
+		LlvmValue ar = n.array.accept(this);
+		LlvmValue in = n.index.accept(this);
+		LlvmRegister lhs = new LlvmRegister(ar.type);
+		List<LlvmValue> off = new ArrayList<LlvmValue>();
+		off.add(new LlvmIntegerLiteral(0));
+		off.add(in);
+		assembler.add(new LlvmGetElementPointer(lhs,ar,off));
+		LlvmRegister lkup = new LlvmRegister (((LlvmPointer)(ar.type)).content);
+		assembler.add (new LlvmLoad (lkup, lhs));
+		return lkup;
+		}
 	public LlvmValue visit(ArrayLength n){
-		System.out.println("ArrayLength");
-return null;}
+		LlvmValue ar = n.array.accept (this);
+		LlvmRegister lhs = new LlvmRegister (ar.type);
+	    List<LlvmValue> off = new LinkedList<LlvmValue> ();
+	    off.add (new LlvmIntegerLiteral (0));
+	    assembler.add (new LlvmGetElementPointer (lhs, ar, off));
+	    LlvmRegister lngth = new LlvmRegister (((LlvmPointer)(ar.type)).content);
+	    assembler.add (new LlvmLoad (lngth, lhs));
+	    return lhs;
+		}
 
 	public LlvmValue visit(Call n){
 		System.out.println("Call");
@@ -562,12 +578,12 @@ return null;}
 		}
 	public LlvmValue visit(Not n){
 		System.out.println("Not");
-
-		//TODO: Fazer
-
-		LlvmValue e = n.exp.accept(this);
+		//fazer Xor com o bool 1 sempre inverte o booleano existente
+		LlvmValue neg = n.exp.accept(this);
+        LlvmRegister N = new LlvmRegister(LlvmPrimitiveType.I1);
+        assembler.add(new LlvmXor(N, LlvmPrimitiveType.I1, neg, new LlvmBool(1)));
+        return N;
 		
-		return null;
 		
 	
 	}
