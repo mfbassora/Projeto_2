@@ -41,7 +41,6 @@ import llvmast.*;
 
 import java.util.*;
 
-import javax.xml.soap.Node;
 
 public class Codegen extends VisitorAdapter{
 	private List<LlvmInstruction> assembler;
@@ -88,22 +87,7 @@ public class Codegen extends VisitorAdapter{
 		List<LlvmType> mallocpts = new LinkedList<LlvmType>();
 		mallocpts.add(LlvmPrimitiveType.I32);
 		codeGenerator.assembler.add(new LlvmExternalDeclaration("@malloc", new LlvmPointer(LlvmPrimitiveType.I8),mallocpts)); 
-		//Vamos declarar os methods
-		Iterator it2 = codeGenerator.mySymTab.classes.entrySet().iterator();
-		List<LlvmType> valueList = new LinkedList<LlvmType>();
-		LlvmType aux=null;
-		while (it2.hasNext()) {	
-
-			 Map.Entry mapEntry = (Map.Entry) it2.next();
-			 if(it2.hasNext()){
-			 ClassNode cn = (ClassNode)mapEntry.getValue();
-			 for(int i=0;i<cn.methodList.size();i++){
-			MethodNode mn = cn.methodList.get(i);
-			
-			 codeGenerator.assembler.add(new LlvmExternalDeclaration(mn.identificator,mn.retType,mn.typeList));
-			}}
-		}
-
+		
 		String r = new String();
 		for(LlvmInstruction instr : codeGenerator.assembler)
 			r += instr+"\n";
@@ -247,16 +231,17 @@ public class Codegen extends VisitorAdapter{
 	
 
 		//Vamos achar o current method pelo nome
-		for(int i=0;i<this.classEnv.methodList.size();i++)
-		{
-			if(this.classEnv.methodList.get(i).identificator.equals(n.name.toString()))
-			{
-				//achamos o method
-				this.methodEnv=this.classEnv.methodList.get(i);
-			}
-		}
+		
+			this.methodEnv=this.classEnv.methodList.get("@__"+n.name.toString()+"_"+this.classEnv.nameClass);
+			
+		
+		
+
+		//vamos adicionar a classe que este metodo pertence primeiro no valueList
+		valueList.add(new LlvmNamedValue("%this",new LlvmPointer(new LlvmClass(this.classEnv.classType,"%class."+this.classEnv.nameClass))));
 		for (util.List<Formal> formal = n.formals; formal != null; formal = formal.tail)
 		{
+			//vamos declarar os formals no comeco
 			aux = new LlvmNamedValue("%"+formal.head.name.toString(),helper.findType(formal.head.type));
 			valueList.add(aux);
 		};
@@ -264,6 +249,13 @@ public class Codegen extends VisitorAdapter{
 		//Vamos definir o metodo primeiro
 		assembler.add(new LlvmDefine("@__"+n.name.toString()+"_"+this.classEnv.nameClass, helper.findType(n.returnType),valueList));
 		assembler.add(new LlvmLabel(new LlvmLabelValue("entry")));
+		// Declarar os Formal
+		for (util.List<Formal> formal = n.formals; formal != null; formal = formal.tail)
+		{
+			//vamos declarar os formals no comeco
+			formal.head.accept(this);
+			
+		};
 		//Vamos declarar as variaveis
 		for (util.List<VarDecl> varDec = n.locals; varDec != null; varDec = varDec.tail)
 		{
@@ -277,11 +269,8 @@ public class Codegen extends VisitorAdapter{
 			
 		};
 		//Retorno
-		LlvmRegister R1 = new LlvmRegister(new LlvmPointer(LlvmPrimitiveType.I32));
-		assembler.add(new LlvmAlloca(R1, LlvmPrimitiveType.I32, new LinkedList<LlvmValue>()));
-		LlvmRegister R2 = new LlvmRegister(LlvmPrimitiveType.I32);
-		assembler.add(new LlvmLoad(R2,R1));
-		assembler.add(new LlvmRet(R2));
+		
+		assembler.add(new LlvmRet(n.returnExp.accept(this)));
 		
 		//Fim do metodo
 		assembler.add(new LlvmCloseDefinition());
@@ -291,8 +280,12 @@ public class Codegen extends VisitorAdapter{
 	
 	public LlvmValue visit(Formal n){
 		System.out.println("Formal");
+		Helper help = new Helper();
+		//Criaremos um reg_addr e colocaremos o valor nele
+		LlvmValue retReg = new LlvmNamedValue("%"+n.name.toString()+"_addr",new LlvmPointer(help.findType(n.type)));
+		assembler.add(new LlvmAllocaUnic(retReg,help.findType(n.type)));
+		assembler.add(new LlvmStore(new LlvmNamedValue("%"+n.name.s,help.findType(n.type)), retReg));
 
-		//Teoricamente nao sera preciso implementar essa func, esta em Helper().
 		return null;}
 	public LlvmValue visit(IntArrayType n){
 		System.out.println("IntArrayType");
@@ -370,6 +363,7 @@ public class Codegen extends VisitorAdapter{
 		//Declarando a variavel
 		LlvmValue var= n.var.accept(this);
 		//Declarando a expressao
+		System.out.println("   asdas   "+n.exp.toString());
 
 		LlvmValue exp =n.exp.accept(this);
 		assembler.add(new LlvmStore(exp,var));
@@ -483,13 +477,11 @@ public class Codegen extends VisitorAdapter{
 		Helper help = new Helper();
 		//Allocando o objeto
 		LlvmValue classPtr = n.object.accept(this);
-		
 		LlvmType ty = help.findType(n.type);
 		LlvmRegister returnReg = new LlvmRegister(help.findType(n.type));
 		
-		LlvmNamedValue name = new LlvmNamedValue("@__"+n.method.toString()+"_"+this.classEnv.nameClass, LlvmPrimitiveType.LABEL);
 		List<LlvmValue> args = new ArrayList<LlvmValue>();
-		List<LlvmType> typelist = new ArrayList<LlvmType>();
+		List<LlvmType> typelist = null;
 		//Vamos apendar primeiro a classe
 		args.add(classPtr);
 		
@@ -499,8 +491,7 @@ public class Codegen extends VisitorAdapter{
 			args.add(aux);
 					
 		};
-		//TODO:Cntinuar daqui: Identifier esta dando erro!!!!!
-		assembler.add(new LlvmCall(returnReg, ty, typelist, name.name, args));
+		assembler.add(new LlvmCall(returnReg, ty, typelist ,"@__"+n.method.s+"_"+this.classEnv.nameClass , args));
 
 		return returnReg;
 	}
@@ -521,15 +512,27 @@ public class Codegen extends VisitorAdapter{
 	//DONE
 	public LlvmValue visit(IdentifierExp n){
 		System.out.println("IdentifierExp");
-		
-		Helper helper = new Helper();
-		LlvmType lType =helper.findType(n.type); 
-		//Vamos dar o load em uma variavel temporaria
-		LlvmRegister lhs = new LlvmRegister(lType);
-		LlvmNamedValue addressReg = new LlvmNamedValue("%"+n.name.s, new LlvmPointer(helper.findType(n.type)));
-		assembler.add(new LlvmLoad(lhs,addressReg));
-		//Depois de dar um load, enviamos o registrador para ser usado
-		return lhs;
+		 LlvmValue address = n.name.accept (this);
+	        LlvmRegister temporary = new LlvmRegister (address.type);
+	        
+	        if (address instanceof LlvmRegister)
+	          assembler.add (new LlvmLoad (temporary,
+	                                       new LlvmNamedValue (address.toString (),
+	                                                          address.type)));
+	          else
+	        assembler.add (new LlvmLoad (temporary,
+	                                     new LlvmNamedValue (address + ".addr",
+	                                                         address.type)));
+	        return temporary;
+//		
+//		Helper helper = new Helper();
+//		LlvmType lType =helper.findType(n.type); 
+//		//Vamos dar o load em uma variavel temporaria
+//		LlvmRegister lhs = new LlvmRegister(lType);
+//		LlvmNamedValue addressReg = new LlvmNamedValue("%"+n.name.s, new LlvmPointer(helper.findType(n.type)));
+//		assembler.add(new LlvmLoad(lhs,addressReg));
+//		//Depois de dar um load, enviamos o registrador para ser usado
+//		return lhs;
 
 		}
 	public LlvmValue visit(This n){
@@ -550,7 +553,6 @@ public class Codegen extends VisitorAdapter{
 		LlvmRegister R1 = new LlvmRegister(helper.findType(n.type));
 		//Achando o valor da array
 		LlvmValue arraySize = n.size.accept(this);
-		System.out.println(helper.findType(n.type));
 		assembler.add(new LlvmMalloc(R1,LlvmPrimitiveType.I32,arraySize));
 
 //Vamos agora retornar o ponteiro para a array
@@ -558,23 +560,21 @@ public class Codegen extends VisitorAdapter{
 		return R1;
 		}
 	public LlvmValue visit(NewObject n){
-		//TODO: 
-		//TODO: PRECISO RESOLVER ISSO
-		//TODO: 
+
 
 		System.out.println("New Object");
 
 		Helper help = new Helper();
 		//Vamos avisar que estamos na classe actual
 		this.classEnv = this.mySymTab.classes.get(n.className.toString());
-		LlvmType ObjectType = n.className.accept(this).type;
-		LlvmValue cD = new LlvmNamedValue("%class."+n.className.toString(),LlvmPrimitiveType.LABEL);
-
-		LlvmValue r1 = new LlvmRegister(ObjectType);
+		//Criando o tipo classe
 		
-		assembler.add(new LlvmMalloc(r1,ObjectType,"%"+n.className.toString()));
+		LlvmType ObjectType = new LlvmClass(this.classEnv.classType,"%class."+this.classEnv.nameClass);
+		
+		LlvmValue r1 = new LlvmRegister(new LlvmPointer(ObjectType));
+		assembler.add(new LlvmMalloc(r1,ObjectType,"%class."+n.className.toString()));
+		//Retornando o registrador da classe alocada
 		return r1;
-		//return null;
 		}
 	public LlvmValue visit(Not n){
 		System.out.println("Not");
@@ -587,39 +587,80 @@ public class Codegen extends VisitorAdapter{
 		
 	
 	}
-	public LlvmValue visit(Identifier n){
+	public LlvmValue visit(Identifier n)
+	{
+		//Pode ser Classe, Method, VarClass ou MethodVar
 		//Vamos achar a declaracao da variavel primeiro
 		System.out.println("Identifier");
-		//Temos tipo classe id, var id 
-		
+		//Temos tipo classe identifier, class variable, method identifier ou method var
+
 		String name = null;
 		LlvmType tp = null;
 		
 		Helper helper=new Helper();
-		if(this.methodEnv!=null){
-			//Temos um identifier de method
-		for (util.List<VarDecl> varDec = this.methodEnv.varList; varDec != null; varDec = varDec.tail)
-		{
+		if(this.methodEnv==null){
+			//declaracao de variavel de classe
+		
+
 				
-				if(varDec.head.name.toString().equals(n.s))
-				{
 					//Achamos a declaracao
-					name = varDec.head.name.toString();
-					tp=helper.findType(varDec.head.type);
-				}
+					name = this.methodEnv.varList.get(n.s).name.toString();
+					tp=helper.findType(this.methodEnv.varList.get(n.s).type);
 			
-		};
-		}else if(this.classEnv!=null)
-		{
-		//Temos um identifier de classe
-			name = "class."+n.s;
-			tp = this.classEnv.classType;
-		}
+			
+		
+		
 		//Declarando o namedValue
 		return new LlvmNamedValue("%"+name,new LlvmPointer(tp));
 		
 
+		}else{
+			//Identificador de variavel de metodo ou classe, ou declaracao de method
+			//Por ordem, o LlvmNamedValue comeca do method
+			LlvmValue value = null;
+			if(this.methodEnv.varList.containsKey(n.s))
+			{
+				//Vamos declara-la como uma variavel local pois ela esta declarada localmente
+				return new LlvmNamedValue("%"+this.methodEnv.varList.get(n.s).name.s,new LlvmPointer(helper.findType(this.methodEnv.varList.get(n.s).type)));
+			}else if(this.methodEnv.formalList.containsKey(n.s))
+			{
+				//Ela e parte do formal do metodo, temos entao que enviar como o address, que foi declarado inicialmente
+				return new LlvmNamedValue("%"+this.methodEnv.formalList.get(n.s).name.s+"_addr",new LlvmPointer(helper.findType(this.methodEnv.formalList.get(n.s).type)));
+
+			}else if(this.methodEnv.methodClass.varList.containsKey(n.s))
+			{
+				
+				System.out.println("MAOE");
+
+				//Ele faz parte das variaveis da classe, entao temos que usar o getElementPointer
+				LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I32);
+				//GetelementPointer, achamos a posicao da variavel
+				int index = 0;
+				for(String varName :this.methodEnv.methodClass.varList.keySet())
+				{
+					if(varName.equals(n.s)){
+						break;
+					}else{
+					index=index+1;
+					}
+					
+				}
+				LlvmValue index0 = new LlvmIntegerLiteral(0);
+				LlvmValue index1 = new LlvmIntegerLiteral(index);
+				List<LlvmValue> offsets=new LinkedList<LlvmValue>();
+				offsets.add(index0);
+				offsets.add(index1);
+				//Agora chamamos o getelementpointer
+				assembler.add(new LlvmGetElementPointer(lhs,new LlvmNamedValue("%this",new LlvmPointer(new LlvmClass(this.methodEnv.methodClass.classType,"%class."+this.methodEnv.methodClass.nameClass))),offsets));
+				//Load para um registrador
+				
+				return lhs;
+				
+			}
+			
 		}
+		return null;
+	}
 }
 class Helper {
 	//Metodo que verifica qual LlvmType o Type pertence
@@ -679,6 +720,7 @@ public LlvmValue visit(MainClass n){
 }
 
 public LlvmValue visit(ClassDeclSimple n){
+	
 	List<LlvmType> typeList = new ArrayList<LlvmType>();
 	// Constroi TypeList com os tipos das variaveis da Classe (vai formar a Struct da classe)
 	for (util.List<VarDecl> c = n.varList; c != null; c = c.tail)
@@ -700,11 +742,11 @@ public LlvmValue visit(ClassDeclSimple n){
 	};
 	int i=0;
 	
-	List<LlvmValue> varList = new ArrayList<LlvmValue>();
+	Map<String, LlvmValue> varList= new LinkedHashMap<String, LlvmValue>();
 	// Constroi VarList com as Variaveis da Classe
 	for (util.List<VarDecl> c = n.varList; c != null; c = c.tail)
 	{
-		varList.add(new LlvmNamedValue(c.head.name.s,typeList.get(i)));
+		varList.put(c.head.name.toString(),new LlvmNamedValue(c.head.name.s,typeList.get(i)));
 		i++;
 	};
 	ClassNode CS = new ClassNode(n.name.s, new LlvmStructure(typeList),varList);
@@ -738,15 +780,25 @@ public LlvmValue visit(ClassDeclSimple n){
 	public LlvmValue visit(MethodDecl n){
 		Helper helper = new Helper();
 		List<LlvmType> typeList = new LinkedList<LlvmType>();
+		Map<String, Formal> formalList = new LinkedHashMap<String,Formal>();
+		Map<String, VarDecl> varList = new LinkedHashMap<String,VarDecl>();
+		//Vamos declarar a classe a qual ele pertence primeiro
+		typeList.add(new LlvmPointer(new LlvmClass(this.classEnv.classType,"%class."+this.classEnv.nameClass)));
 		for (util.List<Formal> c = n.formals; c != null; c = c.tail)
 		{
+			formalList.put(c.head.name.s, c.head);
 			typeList.add(helper.findType(c.head.type));
+		};
+		for (util.List<VarDecl> vard = n.locals; vard != null; vard = vard.tail)
+		{
+			varList.put(vard.head.name.toString(), vard.head);
+			typeList.add(helper.findType(vard.head.type));
 		};
 		
 		//Vamos fazer a declaracao deste metodo e guardar na lista da classe
-		MethodNode mn= new MethodNode("@__"+n.name.toString()+"_"+this.classEnv.nameClass, LlvmPrimitiveType.I32,n.formals,n.locals,classEnv,typeList);
+		MethodNode mn= new MethodNode("@__"+n.name.toString()+"_"+this.classEnv.nameClass, LlvmPrimitiveType.I32,formalList,varList,classEnv,typeList);
 		//Guardando method dentro da classe que ele pertence
-		classEnv.methodList.add(mn);	
+		classEnv.methodList.put(mn.identificator, mn);	
 
 		return null;
 		}
@@ -763,25 +815,25 @@ public LlvmValue visit(ClassDeclSimple n){
 class ClassNode extends LlvmType {
 	String nameClass;
 	LlvmStructure classType;
-	List<LlvmValue> varList;
-	List<MethodNode> methodList; 
-	ClassNode (String nameClass, LlvmStructure classType, List<LlvmValue> varList){
+	Map<String, LlvmValue> varList;
+	public Map<String, MethodNode> methodList; 
+	ClassNode (String nameClass, LlvmStructure classType,   Map<String, LlvmValue> varList){
 		this.nameClass=nameClass;
 		this.classType = classType;
 		this.varList = varList;
-		this.methodList = new ArrayList<MethodNode>();
+		this.methodList = new LinkedHashMap<String, MethodNode>();
 	}
 }
 
 class MethodNode extends LlvmType{
 	LlvmType retType;
-	util.List<Formal> formalList;
-	util.List<VarDecl> varList;
+	Map<String, Formal> formalList;
+	Map<String, VarDecl> varList;
 	List<LlvmType> typeList;
 	ClassNode methodClass;
 	String identificator;
 	
-	MethodNode (String nameMethod,LlvmType retType,util.List<Formal> formalList,util.List<VarDecl> varList, ClassNode methodClass, List<LlvmType> typeList){
+	MethodNode (String nameMethod,LlvmType retType,Map<String, Formal> formalList,Map<String, VarDecl> varList, ClassNode methodClass, List<LlvmType> typeList){
 	this.identificator=nameMethod;
 	this.formalList=formalList;
 	this.varList=varList;
