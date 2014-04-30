@@ -48,7 +48,7 @@ public  class LlvmCall extends LlvmInstruction{
 		fnTypeResult += ")*";
 	} else 
 	{
-		fnTypeResult = fnType.toString();
+		fnTypeResult = "";
 	}
 
 	
