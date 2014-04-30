@@ -378,6 +378,16 @@ public class Codegen extends VisitorAdapter{
 	
 	public LlvmValue visit(ArrayAssign n){
 		System.out.println("ArrayAssign");
+		LlvmValue ar = n.var.accept(this);
+		LlvmValue in = n.index.accept(this);
+		LlvmValue vl = n.value.accept(this);
+		LlvmRegister lhs = new LlvmRegister(vl.type);
+		List<LlvmValue> args = new ArrayList<LlvmValue>();
+		args.add(new LlvmIntegerLiteral(0));
+		args.add(in);
+		assembler.add(new LlvmGetElementPointer(lhs,ar,args));
+		assembler.add(new LlvmStore(vl,lhs));
+		
 
 		
 		//TODO: Fazer
@@ -386,17 +396,40 @@ public class Codegen extends VisitorAdapter{
 	}
 	public LlvmValue visit(And n){
 		System.out.println("And");
-
+		Helper help = new Helper();
+		LlvmValue v1 = n.lhs.accept(this);
+		LlvmValue v2 = n.rhs.accept(this);
+		LlvmType ty = help.findType(n.type);
+		LlvmRegister lhs = new LlvmRegister(ty);
+		assembler.add(new LlvmIcmp(lhs, 2, ty, v1, v2));
+		
 		//TODO: Fazer
 
-		return null;
+		return lhs;
 		
 	}
 	public LlvmValue visit(LessThan n){
 		System.out.println("LessThan");
-
-		return null;}
+		Helper help = new Helper();
+		LlvmValue v1 = n.lhs.accept(this);
+		LlvmValue v2 = n.rhs.accept(this);
+		LlvmType ty = help.findType(n.type);
+		LlvmRegister lhs = new LlvmRegister(ty);
+		assembler.add(new LlvmIcmp(lhs, 1, ty, v1, v2));
+		
+		return lhs;}
 	//TODO: Fazer
+	
+	public LlvmValue visit(Equal n){
+		Helper help = new Helper();
+		LlvmValue v1 = n.lhs.accept(this);
+		LlvmValue v2 = n.rhs.accept(this);
+		LlvmType ty = help.findType(n.type);
+		LlvmRegister lhs = new LlvmRegister(ty);
+		assembler.add(new LlvmIcmp(lhs, 0, ty, v1, v2));
+		
+
+		return lhs;}
 
 	 
 	//DONE
@@ -485,7 +518,8 @@ return null;}
 		}
 	public LlvmValue visit(This n){
 		//TODO: Fazer
-		System.out.println("depois do var");
+		System.out.println("This");
+		//
 
 		return null;
 		
@@ -531,6 +565,8 @@ return null;}
 
 		//TODO: Fazer
 
+		LlvmValue e = n.exp.accept(this);
+		
 		return null;
 		
 	

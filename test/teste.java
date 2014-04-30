@@ -14,6 +14,7 @@ class BC
 		
 		CD tree;
 		tree = new CD();
+
 		return 0;
 	}
 }
