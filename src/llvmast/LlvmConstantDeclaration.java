@@ -7,7 +7,9 @@ public class LlvmConstantDeclaration extends LlvmInstruction{
 	this.rhs = rhs;
     }
     
-    public String toString(){
+    
+
+	public String toString(){
 	return name + " = " + rhs;
     }
 }

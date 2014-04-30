@@ -6,6 +6,7 @@ public class LlvmStructure extends LlvmType{
     public int sizeByte;
     public List<LlvmType> typeList;
     
+   
     public LlvmStructure(List<LlvmType> typeList){
     	this.typeList = typeList;
     	
