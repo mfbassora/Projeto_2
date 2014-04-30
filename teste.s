@@ -22,9 +22,9 @@ entry1:
   %b_addr = alloca i32
   store i32 %b, i32 * %b_addr
   %tmp10 = getelementptr %class.BC * %this, i32 0, i32 0
-  store i32 3, i32 %tmp10
+  store i32 3, i32 * %tmp10
   %tmp11 = getelementptr %class.BC * %this, i32 0, i32 0
-  %tmp12 = load i32 %tmp11
+  %tmp12 = load i32 * %tmp11
   ret i32 %tmp12
 }
 declare i32 @printf (i8 *, ...)
