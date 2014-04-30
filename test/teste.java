@@ -3,23 +3,25 @@ class a
     public static void main(String[] args)
     {
     	
-    	//System.out.println(0);
+    	System.out.println(new BC().soma(1,18));
 
     }
 }
 class BC
 {
-	public int soma()
+	public int soma(int a, int b)
 	{
-		int[] a;
-		int b;
-		int c;
-		b=10;
-		c=20;
-		a = new int[b+c];
-    	System.out.println(4+3);
-
+		
+		CD tree;
+		tree = new CD();
 		return 0;
 	}
 }
    
+class CD
+{
+	public int soma(boolean d)
+	{
+		return 0;
+	}
+}
