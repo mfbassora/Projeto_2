@@ -361,12 +361,14 @@ public class Codegen extends VisitorAdapter{
 		System.out.println("Assign");
 
 		//Declarando a variavel
-		LlvmValue var= n.var.accept(this);
+		LlvmValue varTemp= n.var.accept(this);
+		LlvmValue varPtr = new LlvmNamedValue(varTemp.toString(),new LlvmPointer(varTemp.type));
 		//Declarando a expressao
 		System.out.println("   asdas   "+n.exp.toString());
 
 		LlvmValue exp =n.exp.accept(this);
-		assembler.add(new LlvmStore(exp,var));
+		
+		assembler.add(new LlvmStore(exp,varPtr));
 		return null;
 	}
 	
@@ -502,21 +504,13 @@ return null;}
 	        if (address instanceof LlvmRegister)
 	          assembler.add (new LlvmLoad (temporary,
 	                                       new LlvmNamedValue (address.toString (),
-	                                                          address.type)));
+	                                    		   new LlvmPointer (address.type))));
 	          else
 	        assembler.add (new LlvmLoad (temporary,
-	                                     new LlvmNamedValue (address + ".addr",
-	                                                         address.type)));
+	                                     new LlvmNamedValue (address + "_addr",
+	                                    		 new LlvmPointer (address.type))));
 	        return temporary;
-//		
-//		Helper helper = new Helper();
-//		LlvmType lType =helper.findType(n.type); 
-//		//Vamos dar o load em uma variavel temporaria
-//		LlvmRegister lhs = new LlvmRegister(lType);
-//		LlvmNamedValue addressReg = new LlvmNamedValue("%"+n.name.s, new LlvmPointer(helper.findType(n.type)));
-//		assembler.add(new LlvmLoad(lhs,addressReg));
-//		//Depois de dar um load, enviamos o registrador para ser usado
-//		return lhs;
+
 
 		}
 	public LlvmValue visit(This n){
