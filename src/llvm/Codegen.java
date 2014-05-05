@@ -346,14 +346,14 @@ public class Codegen extends VisitorAdapter{
 		return null;}
 	public LlvmValue visit(If n){
 		System.out.println("If");
-
-		LlvmValue v1 = n.condition.accept(this);
+		
+		
 
 		LlvmLabelValue ifThen = new LlvmLabelValue("if.then");
 		LlvmLabelValue ifElse = new LlvmLabelValue("if.else");
 		LlvmLabelValue ifEnd = new LlvmLabelValue("if.end");
 		
-		assembler.add(new LlvmBranch(v1, ifThen, ifElse));
+		assembler.add(new LlvmBranch(n.condition.accept(this), ifThen, ifElse));
 		assembler.add(new LlvmLabel(ifThen));
 		n.thenClause.accept(this);
 		assembler.add(new LlvmBranch(ifEnd));
@@ -454,7 +454,6 @@ public class Codegen extends VisitorAdapter{
 		LlvmValue v1 = n.lhs.accept(this);
 		LlvmValue v2 = n.rhs.accept(this);
 		LlvmType ty = v1.type;
-		System.out.println("test"+ty.toString());
 		LlvmRegister lhs = new LlvmRegister(ty);
 		
 		assembler.add(new LlvmIcmp(lhs, 1, ty, v1, v2));
@@ -463,10 +462,9 @@ public class Codegen extends VisitorAdapter{
 		return lhs;}
 	
 	public LlvmValue visit(Equal n){
-		Helper help = new Helper();
 		LlvmValue v1 = n.lhs.accept(this);
 		LlvmValue v2 = n.rhs.accept(this);
-		LlvmType ty = help.findType(n.type);
+		LlvmType ty =v1.type;
 		LlvmRegister lhs = new LlvmRegister(ty);
 		assembler.add(new LlvmIcmp(lhs, 0, ty, v1, v2));
 		
@@ -646,11 +644,10 @@ public class Codegen extends VisitorAdapter{
 		}
 	public LlvmValue visit(Not n){
 		System.out.println("Not");
-		//fazer Xor com o bool 1 sempre inverte o booleano existente
-		LlvmValue neg = n.exp.accept(this);
-        LlvmRegister N = new LlvmRegister(LlvmPrimitiveType.I1);
-        //assembler.add(new LlvmXor(N, LlvmPrimitiveType.I1, neg, new LlvmBool(1)));
-        return N;
+		LlvmValue v1 = n.exp.accept(this);
+        LlvmRegister lhs = new LlvmRegister(LlvmPrimitiveType.I1);
+        assembler.add(new LlvmXor(lhs, LlvmPrimitiveType.I1, v1, new LlvmBool(1)));
+        return lhs;
 		
 		
 	
@@ -763,13 +760,7 @@ class Helper {
 
 			return (LlvmPrimitiveType.I1);	
 		}else if(t instanceof IntArrayType){
-			//Vamos criar uma structure para alocar o vetor e guardar o tamanho
-//			List<LlvmType> arrayTyp = new ArrayList<LlvmType>();
-//			arrayTyp.add(new LlvmPointer(LlvmPrimitiveType.I32));
-//			LlvmStructure arrayStructure =new LlvmStructure(arrayTyp);
-//			arrayStructure.sizeByte=0;
-//			System.out.println("asdasdsaadsd  "+arrayStructure.sizeByte);
-//			return (LlvmType)arrayStructure;	
+
 			return new LlvmPointer(LlvmPrimitiveType.I32);
 
 		}else if(t instanceof IdentifierType)
@@ -834,8 +825,10 @@ public LlvmValue visit(ClassDeclSimple n){
 
 		}else if(c.head.type instanceof IdentifierType)
 		{
-			
-		typeList.add(LlvmPrimitiveType.LABEL);	
+		System.out.println("/n/n/n/"+c.head.type);	
+		//primeiro criamos o tipo da classe
+		LlvmClass typeClass = new LlvmClass(new LlvmStructure(new LinkedList<LlvmType>()),"%class."+c.head.type);
+		typeList.add(new LlvmPointer(typeClass));	
 
 		}
 	};
