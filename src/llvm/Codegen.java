@@ -59,16 +59,15 @@ public class Codegen extends VisitorAdapter{
 		codeGenerator = new Codegen();
 		//Colocando as estruturas das classes e metodos no inicio usando TabSymbol
 		codeGenerator.mySymTab.FillTabSymbol(p);
-		
+	    //System.exit(0);
 		// Formato da String para o System.out.printlnijava "%d\n"
 		codeGenerator.assembler.add(new LlvmConstantDeclaration("@.formatting.string", "private constant [4 x i8] c\"%d\\0A\\00\""));	
 		Helper helper= new Helper();
 		//Antes de comecar a emitir codigo, vamos declarar as variaveis do sistema e imprimir elas
 		Iterator it = codeGenerator.mySymTab.classes.entrySet().iterator();
-		Map.Entry mapEntry = (Map.Entry) it.next();
 		while (it.hasNext()) {	
-
-			  mapEntry = (Map.Entry) it.next();
+			System.out.println("entrou");
+			Map.Entry mapEntry = (Map.Entry) it.next();
 			 
 			 ClassNode cn = (ClassNode)mapEntry.getValue();
 			 codeGenerator.assembler.add(new LlvmConstantDeclaration("%class."+ mapEntry.getKey(), "type "+cn.classType));
@@ -450,14 +449,14 @@ public class Codegen extends VisitorAdapter{
 	}
 	public LlvmValue visit(LessThan n){
 		System.out.println("LessThan");
-		Helper help = new Helper();
+		//Helper help = new Helper();
 		LlvmValue v1 = n.lhs.accept(this);
 		LlvmValue v2 = n.rhs.accept(this);
 		LlvmType ty = v1.type;
 		LlvmRegister lhs = new LlvmRegister(ty);
 		
 		assembler.add(new LlvmIcmp(lhs, 1, ty, v1, v2));
-		System.out.println("LessThan");
+		System.out.println("saiu LessThan");
 
 		return lhs;}
 	
@@ -789,14 +788,15 @@ class SymTab extends VisitorAdapter{
     	this.classes= new LinkedHashMap<String, ClassNode>();
     }
     public LlvmValue FillTabSymbol(Program n){
-    
+    //System.exit(0);
 	n.accept(this);
 	
 	return null;
     }
 public LlvmValue visit(Program n){
+	System.out.print("antes do accept main");
 	n.mainClass.accept(this);
-
+	System.out.print("depois do accept main");
 	for (util.List<ClassDecl> c = n.classList; c != null; c = c.tail)
 		c.head.accept(this);
 
@@ -804,7 +804,8 @@ public LlvmValue visit(Program n){
 }
 
 public LlvmValue visit(MainClass n){
-	classes.put(n.className.s, new ClassNode(n.className.s, null, null));
+	ClassNode CS = new ClassNode(n.className.s, new LlvmStructure(new ArrayList<LlvmType>()),null);
+	classes.put(n.className.s, CS);
 	return null;
 }
 
@@ -859,6 +860,11 @@ public LlvmValue visit(ClassDeclSimple n){
 }
 
 	public LlvmValue visit(ClassDeclExtends n){
+		System.out.println("entra no extend");
+		//System.exit(0);
+		if (n.name == n.superClass){
+			System.exit(0);
+		}
 
 		List<LlvmType> typeList = new ArrayList<LlvmType>();
 		ClassNode cDad= this.classes.get(n.superClass.s);

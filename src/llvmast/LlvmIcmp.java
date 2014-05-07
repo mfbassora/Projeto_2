@@ -20,6 +20,7 @@ public  class LlvmIcmp extends LlvmInstruction{
     	}else{
     		cmp = "eq";
     	}
+    	System.out.println(cmp);
 
     }
 

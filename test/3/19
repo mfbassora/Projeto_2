@@ -1,9 +1,9 @@
-// testando operador < (OK)
+// testando operador < (lado esquerdo invalido)
 class m
 {
    public static void main(String[] args)
    {
-       if ( 10 < 20 )
+       if ( new m() < 20 )
           System.out.println(1);
    }
 }
