@@ -59,18 +59,18 @@ public class Codegen extends VisitorAdapter{
 		codeGenerator = new Codegen();
 		//Colocando as estruturas das classes e metodos no inicio usando TabSymbol
 		codeGenerator.mySymTab.FillTabSymbol(p);
-		
+	    //System.exit(0);
 		// Formato da String para o System.out.printlnijava "%d\n"
 		codeGenerator.assembler.add(new LlvmConstantDeclaration("@.formatting.string", "private constant [4 x i8] c\"%d\\0A\\00\""));	
 		Helper helper= new Helper();
 		//Antes de comecar a emitir codigo, vamos declarar as variaveis do sistema e imprimir elas
 		Iterator it = codeGenerator.mySymTab.classes.entrySet().iterator();
-		Map.Entry mapEntry = (Map.Entry) it.next();
 		while (it.hasNext()) {	
-
-			  mapEntry = (Map.Entry) it.next();
+			System.out.println("entrou");
+			Map.Entry mapEntry = (Map.Entry) it.next();
 			 
 			 ClassNode cn = (ClassNode)mapEntry.getValue();
+			 
 			 codeGenerator.assembler.add(new LlvmConstantDeclaration("%class."+ mapEntry.getKey(), "type "+cn.classType));
 			
 		}
@@ -484,14 +484,14 @@ public class Codegen extends VisitorAdapter{
 	}
 	public LlvmValue visit(LessThan n){
 		System.out.println("LessThan");
-		Helper help = new Helper();
+		//Helper help = new Helper();
 		LlvmValue v1 = n.lhs.accept(this);
 		LlvmValue v2 = n.rhs.accept(this);
 		LlvmType ty = v1.type;
 		LlvmRegister lhs = new LlvmRegister(ty);
 		
 		assembler.add(new LlvmIcmp(lhs, 1, ty, v1, v2));
-		System.out.println("LessThan");
+		System.out.println("saiu LessThan");
 
 		return lhs;}
 	
@@ -862,12 +862,13 @@ class SymTab extends VisitorAdapter{
     	this.classes= new LinkedHashMap<String, ClassNode>();
     }
     public LlvmValue FillTabSymbol(Program n){
-    
+    //System.exit(0);
 	n.accept(this);
 	
 	return null;
     }
 public LlvmValue visit(Program n){
+	System.out.print("antes do accept main");
 	n.mainClass.accept(this);
 	for (util.List<ClassDecl> c = n.classList; c != null; c = c.tail)
 		c.head.accept(this);
@@ -876,7 +877,8 @@ public LlvmValue visit(Program n){
 }
 
 public LlvmValue visit(MainClass n){
-	classes.put(n.className.s, new ClassNode(n.className.s, null, null));
+	ClassNode CS = new ClassNode(n.className.s, new LlvmStructure(new ArrayList<LlvmType>()),null);
+	classes.put(n.className.s, CS);
 	return null;
 }
 
@@ -931,11 +933,17 @@ public LlvmValue visit(ClassDeclSimple n){
 }
 
 	public LlvmValue visit(ClassDeclExtends n){
-
+		System.out.println("entra no extend");
+		//System.exit(0);
+		if (n.name == n.superClass){
+			System.exit(0);
+		}
+		
 		List<LlvmType> typeList = new ArrayList<LlvmType>();
-		ClassNode cDad= this.classes.get(n.superClass.s);
+		//ClassNode cDad= this.classes.get(n.superClass.s);
 		//Primeiro vamos declarar a classe do extends
-		typeList.add(new LlvmClass(cDad.classType,"%class."+cDad.nameClass));
+		System.out.println(n.superClass.s);
+		typeList.add(new LlvmClass(new LlvmStructure(new ArrayList<LlvmType>()),"%class."+n.superClass.s));
 		// Constroi TypeList com os tipos das variaveis da Classe (vai formar a Struct da classe)
 		for (util.List<VarDecl> c = n.varList; c != null; c = c.tail)
 		{
@@ -967,7 +975,7 @@ public LlvmValue visit(ClassDeclSimple n){
 				arrayLenghts.put(c.head.toString(), 0);	
 			};
 		};
-		ClassNode CS = new ClassNode(n.name.s, new LlvmStructure(typeList),varList,cDad,arrayLenghts);
+		ClassNode CS = new ClassNode(n.name.s, new LlvmStructure(typeList),varList,arrayLenghts);
 		classes.put(n.name.s, CS);
 		
 		
@@ -1041,20 +1049,17 @@ class ClassNode extends LlvmType {
 	Map<String, Integer> arrayLenghts;
 	Map<String, LlvmValue> varList;
 	public Map<String, MethodNode> methodList; 
-	ClassNode classExt;
 	ClassNode (String nameClass, LlvmStructure classType,   Map<String, LlvmValue> varList){
 		this.nameClass=nameClass;
 		this.classType = classType;
 		this.varList = varList;
 		this.methodList = new LinkedHashMap<String, MethodNode>();
-		this.classExt=null;
 	}
-	ClassNode (String nameClass, LlvmStructure classType,   Map<String, LlvmValue> varList, ClassNode cDad,Map<String, Integer> arrayLenghts){
+	ClassNode (String nameClass, LlvmStructure classType,   Map<String, LlvmValue> varList,Map<String, Integer> arrayLenghts){
 		this.nameClass=nameClass;
 		this.classType = classType;
 		this.varList = varList;
 		this.methodList = new LinkedHashMap<String, MethodNode>();
-		this.classExt=cDad;
 		this.arrayLenghts=arrayLenghts;
 	}
 }
