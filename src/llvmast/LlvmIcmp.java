@@ -26,7 +26,7 @@ public  class LlvmIcmp extends LlvmInstruction{
 
     public String toString(){
     	if(this.conditionCode == 2){
-    		return "and "+type+" "+op1+","+op2;
+    		return lhs+ "= and "+type+" "+op1+","+op2;
     	}else{
     		return lhs+" = icmp "+cmp+" "+type+" "+op1+","+" "+op2;
     		
