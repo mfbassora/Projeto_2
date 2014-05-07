@@ -273,7 +273,7 @@ whileTest33:
   %tmp81 = xor i1 %tmp80, true
   %tmp82 = load i1 * %ret_val
   %tmp83 = xor i1 %tmp82, true
- %tmp84 = and i1 %tmp81,%tmp83
+%tmp84= and i1 %tmp81,%tmp83
 br i1 %tmp84, label %whileBody34, label %whileEnd35
 whileBody34:
   %tmp85 = load %class.Element * * %e_addr
@@ -478,7 +478,7 @@ entry59:
   %tmp162 = bitcast i8* %tmp164 to %class.Element*
   store %class.Element * %tmp162, %class.Element * * %el01
   %tmp165 = load %class.Element * * %el01
-  %tmp166 = call i1  @__Init_List(%class.Element * %tmp165, i32 25, i32 37000, i1 false)
+  %tmp166 = call i1  @__Init_Element(%class.Element * %tmp165, i32 25, i32 37000, i1 false)
   store i1 %tmp166, i1 * %aux01
   %tmp167 = load %class.List * * %head
   %tmp169 = load %class.Element * * %el01
@@ -494,7 +494,7 @@ entry59:
   %tmp174 = bitcast i8* %tmp176 to %class.Element*
   store %class.Element * %tmp174, %class.Element * * %el01
   %tmp177 = load %class.Element * * %el01
-  %tmp178 = call i1  @__Init_List(%class.Element * %tmp177, i32 39, i32 42000, i1 true)
+  %tmp178 = call i1  @__Init_Element(%class.Element * %tmp177, i32 39, i32 42000, i1 true)
   store i1 %tmp178, i1 * %aux01
   %tmp179 = load %class.Element * * %el01
   store %class.Element * %tmp179, %class.Element * * %el02
@@ -512,7 +512,7 @@ entry59:
   %tmp187 = bitcast i8* %tmp189 to %class.Element*
   store %class.Element * %tmp187, %class.Element * * %el01
   %tmp190 = load %class.Element * * %el01
-  %tmp191 = call i1  @__Init_List(%class.Element * %tmp190, i32 22, i32 34000, i1 false)
+  %tmp191 = call i1  @__Init_Element(%class.Element * %tmp190, i32 22, i32 34000, i1 false)
   store i1 %tmp191, i1 * %aux01
   %tmp192 = load %class.List * * %head
   %tmp194 = load %class.Element * * %el01
@@ -526,7 +526,7 @@ entry59:
   %tmp197 = bitcast i8* %tmp199 to %class.Element*
   store %class.Element * %tmp197, %class.Element * * %el03
   %tmp200 = load %class.Element * * %el03
-  %tmp201 = call i1  @__Init_List(%class.Element * %tmp200, i32 27, i32 34000, i1 false)
+  %tmp201 = call i1  @__Init_Element(%class.Element * %tmp200, i32 27, i32 34000, i1 false)
   store i1 %tmp201, i1 * %aux01
   %tmp202 = load %class.List * * %head
   %tmp204 = load %class.Element * * %el02
@@ -545,7 +545,7 @@ entry59:
   %tmp214 = bitcast i8* %tmp216 to %class.Element*
   store %class.Element * %tmp214, %class.Element * * %el01
   %tmp217 = load %class.Element * * %el01
-  %tmp218 = call i1  @__Init_List(%class.Element * %tmp217, i32 28, i32 35000, i1 false)
+  %tmp218 = call i1  @__Init_Element(%class.Element * %tmp217, i32 28, i32 35000, i1 false)
   store i1 %tmp218, i1 * %aux01
   %tmp219 = load %class.List * * %head
   %tmp221 = load %class.Element * * %el01

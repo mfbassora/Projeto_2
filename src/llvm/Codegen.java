@@ -244,7 +244,7 @@ public class Codegen extends VisitorAdapter{
 		
 			this.methodEnv=this.classEnv.methodList.get(n.name.toString());
 			
-		
+			
 		
 
 		LlvmType t=null;
@@ -566,6 +566,7 @@ public class Codegen extends VisitorAdapter{
 		System.out.println("Call");
 		Helper help = new Helper();
 		//Allocando o objeto
+		
 		LlvmValue classPtr = n.object.accept(this);
 		LlvmType ty=null;
 		if(n.type instanceof IdentifierType)
@@ -590,20 +591,32 @@ public class Codegen extends VisitorAdapter{
 					
 		};
 		//Achando o method primeiro
-		Iterator it = this.mySymTab.classes.entrySet().iterator();
-		Map.Entry mapEntry = (Map.Entry) it.next();
-		MethodNode m=null;
-		while (it.hasNext()) {	
 
-			  mapEntry = (Map.Entry) it.next();
-		 ClassNode cn = (ClassNode)mapEntry.getValue();
-		 
-			 if(cn.methodList.containsKey(n.method.s))
-			 {
-				 m=cn.methodList.get(n.method.s);
-			 }
-			
+		MethodNode m=null;
+		
+
+		ClassNode cn = this.mySymTab.classes.get(classPtr.type.toString());
+		if(cn != null)
+		{
+		m = cn.methodList.get(n.method.s);
+		}else{
+			String ClassName = classPtr.type.toString().split(" ")[0].split("class.")[1];
+			ClassNode cn2 = this.mySymTab.classes.get(ClassName);
+			m = cn2.methodList.get(n.method.s);
 		}
+//		Iterator it = this.mySymTab.classes.entrySet().iterator();
+//		Map.Entry mapEntry = (Map.Entry) it.next();
+//		while (it.hasNext()) {	
+//
+//			  mapEntry = (Map.Entry) it.next();
+//		 ClassNode cn = (ClassNode)mapEntry.getValue();
+//		 
+//			 if(cn.methodList.containsKey(n.method.s))
+//			 {
+//				 m=cn.methodList.get(n.method.s);
+//			 }
+//			
+//		}
 		assembler.add(new LlvmCall(returnReg, ty, typelist ,"@__"+n.method.s+"_"+m.methodClass.nameClass , args));
 		System.out.println("Call");
 
@@ -628,7 +641,8 @@ public class Codegen extends VisitorAdapter{
 		System.out.println("IdentifierExp");
 		 LlvmValue address = n.name.accept(this);
 	        LlvmRegister temporary = new LlvmRegister (address.type);
-			
+			 System.out.println(address.type+"   idExp\n\n");
+
 	        
 	        if (address instanceof LlvmRegister)
 	          assembler.add (new LlvmLoad (temporary,
@@ -692,8 +706,8 @@ public class Codegen extends VisitorAdapter{
 		this.classEnv = this.mySymTab.classes.get(n.className.toString());
 		//Criando o tipo classe
 		
-		LlvmType ObjectType = new LlvmClass(this.classEnv.classType,"%class."+this.classEnv.nameClass);
-		LlvmValue r1 = new LlvmRegister(new LlvmPointer(ObjectType));
+		LlvmType ObjectType = new LlvmPointer(new LlvmClass(this.classEnv.classType,"%class."+this.classEnv.nameClass));
+		LlvmRegister r1 = new LlvmRegister(ObjectType);
 		assembler.add(new LlvmMalloc(r1,ObjectType,"%class."+n.className.toString()));
 		//Retornando o registrador da classe alocada
 		return r1;
