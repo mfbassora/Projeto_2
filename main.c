@@ -3,10 +3,9 @@
 #include <stdbool.h>
 
 int main(){
-int num_aux ;
-int num[3];
-int * abc;
-abc=num;
-abc[2]=3;
-	return 0;
+int num3 = 20;
+while (num3 <23) {
+	    printf("%d\n", 100);
+	    num3 = num3 + 1 ;
+	}
 };
