@@ -70,6 +70,7 @@ public class Codegen extends VisitorAdapter{
 			Map.Entry mapEntry = (Map.Entry) it.next();
 			 
 			 ClassNode cn = (ClassNode)mapEntry.getValue();
+			 
 			 codeGenerator.assembler.add(new LlvmConstantDeclaration("%class."+ mapEntry.getKey(), "type "+cn.classType));
 			
 		}
@@ -923,11 +924,12 @@ public LlvmValue visit(ClassDeclSimple n){
 		if (n.name == n.superClass){
 			System.exit(0);
 		}
-
+		
 		List<LlvmType> typeList = new ArrayList<LlvmType>();
-		ClassNode cDad= this.classes.get(n.superClass.s);
+		//ClassNode cDad= this.classes.get(n.superClass.s);
 		//Primeiro vamos declarar a classe do extends
-		typeList.add(new LlvmClass(cDad.classType,"%class."+cDad.nameClass));
+		System.out.println(n.superClass.s);
+		typeList.add(new LlvmClass(new LlvmStructure(new ArrayList<LlvmType>()),"%class."+n.superClass.s));
 		// Constroi TypeList com os tipos das variaveis da Classe (vai formar a Struct da classe)
 		for (util.List<VarDecl> c = n.varList; c != null; c = c.tail)
 		{
@@ -959,7 +961,7 @@ public LlvmValue visit(ClassDeclSimple n){
 				arrayLenghts.put(c.head.toString(), 0);	
 			};
 		};
-		ClassNode CS = new ClassNode(n.name.s, new LlvmStructure(typeList),varList,cDad,arrayLenghts);
+		ClassNode CS = new ClassNode(n.name.s, new LlvmStructure(typeList),varList,arrayLenghts);
 		classes.put(n.name.s, CS);
 		
 		
@@ -1033,20 +1035,17 @@ class ClassNode extends LlvmType {
 	Map<String, Integer> arrayLenghts;
 	Map<String, LlvmValue> varList;
 	public Map<String, MethodNode> methodList; 
-	ClassNode classExt;
 	ClassNode (String nameClass, LlvmStructure classType,   Map<String, LlvmValue> varList){
 		this.nameClass=nameClass;
 		this.classType = classType;
 		this.varList = varList;
 		this.methodList = new LinkedHashMap<String, MethodNode>();
-		this.classExt=null;
 	}
-	ClassNode (String nameClass, LlvmStructure classType,   Map<String, LlvmValue> varList, ClassNode cDad,Map<String, Integer> arrayLenghts){
+	ClassNode (String nameClass, LlvmStructure classType,   Map<String, LlvmValue> varList,Map<String, Integer> arrayLenghts){
 		this.nameClass=nameClass;
 		this.classType = classType;
 		this.varList = varList;
 		this.methodList = new LinkedHashMap<String, MethodNode>();
-		this.classExt=cDad;
 		this.arrayLenghts=arrayLenghts;
 	}
 }
